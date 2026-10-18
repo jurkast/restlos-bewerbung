@@ -1,0 +1,17 @@
+lib/
+native/
+dist/
+.venv/
+__pycache__/
+*.pyc
+*.deb
+*.zip
+*.eml
+*.pdf
+*.docx
+*.key
+private.pem
+settings.json
+data*.json
+Profile/
+Sicherungen/
