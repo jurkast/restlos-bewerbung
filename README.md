@@ -1,19 +1,27 @@
-# Restlos Bewerbung 0.6 – Automatische Updates
+# Restlos Bewerbung 0.7 – Beispielbibliothek
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.6.0_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.7.0_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.6.0_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.7.0_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
+
+## Neu: Beispielbibliothek und Ausfüllhilfe
+
+Unter **Anschreiben** öffnet **Passende Beispielantwort finden** die lokale Bibliothek mit 66 eigenständigen Vorschlägen für alle fünf Textabschnitte. Enthalten sind 15 Berufsfelder und acht Bewerbungssituationen, darunter Quereinstieg, Ausbildung, Praktikum und Wiedereinstieg. Suche und Filter lassen sich kombinieren; allgemeine Vorschläge bleiben dabei verfügbar.
+
+Nach der Auswahl füllst du die benötigten Angaben in einzelnen Feldern aus. Unternehmen und Position werden, soweit vorhanden, vorausgefüllt. Der fertige Absatz bleibt frei bearbeitbar. Änderungen an den Angaben erzeugen den Absatz erneut. Unausgefüllte Platzhalter verhindern die Übernahme.
+
+Vorhandene Texte werden standardmäßig ergänzt. Ersetzen ist ausdrücklich auswählbar und erfordert eine Bestätigung. Im Freitextmodus betrifft Ersetzen den gesamten Anschreibentext. Unter **Frühere Texte ansehen** bleiben bis zu zehn vorherige Fassungen verfügbar. Die Beispiele, Eingaben und der Verlauf werden lokal verarbeitet; es ist kein KI-Modell nötig.
 
 ## Automatische Updates ab Version 0.6
 
