@@ -51,6 +51,7 @@ def validate(s):
    if not d['path'].startswith('Profile/'+p['folder']+'/'): raise ValueError('Dokument liegt außerhalb des Profils.')
    resolve(d['path'])
   paths={d['path'] for d in p['documents']}
+  if p['profile'].get('signature') and p['profile']['signature'] not in paths:raise ValueError('Die Unterschrift fehlt in der Profilablage.')
   if p['profile'].get('photo') and p['profile']['photo'] not in paths: raise ValueError('Das Foto fehlt in der Profilablage.')
   if any(n not in paths for a in p['applications'] for n in a['attachments']): raise ValueError('Eine Anlage fehlt in der Profilbibliothek.')
  if s.get('selectedProfile') not in ids: raise ValueError('Aktives Profil fehlt.')
@@ -95,7 +96,7 @@ def persist(s,active_id=None,generate=True):
   for a in p['applications']:
    ap=application_dir(p,a);write(ap/'Bewerbung.json',json.dumps(a,ensure_ascii=False,indent=2))
    write(ap/'Anschreiben/Anschreiben.txt',a['salutation']+'\n\n'+a['letter']+'\n\nMit freundlichen Grüßen\n'+p['profile']['name'])
-   write(ap/'Lebenslauf/Lebenslauf.txt','\n\n'.join(p['profile'][k] for k in PROFILE_FIELDS))
+   write(ap/'Lebenslauf/Lebenslauf.txt','\n\n'.join(p['profile'][k] for k in PROFILE_FIELDS)+'\n\n'+__import__('personal').details(p['profile']))
    manifest=ap/'Anlagen/.zugeordnet.json'
    previous=json.loads(manifest.read_text()) if manifest.exists() else []
    write(ap/'Anlagen/Verzeichnis.txt','\n'.join(a['attachments']))
@@ -118,7 +119,7 @@ def persist(s,active_id=None,generate=True):
   p=selected(s)
   for a in p['applications']:
    folder=application_dir(p,a)
-   digest=hashlib.sha256(json.dumps(['0.3.0',p['profile'],{k:v for k,v in a.items() if k not in ('tracking','aiDraft','letterHistory')}],sort_keys=True).encode()).hexdigest()
+   digest=hashlib.sha256(json.dumps(['0.8.0',p['profile'],{k:v for k,v in a.items() if k not in ('tracking','aiDraft','letterHistory')}],sort_keys=True).encode()).hexdigest()
    stamp=folder/'.pdf-state'
    if stamp.exists() and stamp.read_text()==digest: continue
    for kind,name in [('letter','Anschreiben/Anschreiben.pdf'),('cv','Lebenslauf/Lebenslauf.pdf')]+([('cover','Deckblatt/Deckblatt.pdf')] if a.get('design',{}).get('cover') else []):

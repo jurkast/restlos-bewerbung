@@ -5,7 +5,7 @@ from io import BytesIO
 from xml.sax.saxutils import escape
 ROOT=Path(__file__).resolve().parent
 sys.path.insert(0,str(ROOT/'lib'))
-from reportlab.platypus import SimpleDocTemplate,BaseDocTemplate,Frame,PageTemplate,Paragraph,Spacer,Image,PageBreak
+from reportlab.platypus import SimpleDocTemplate,BaseDocTemplate,Frame,PageTemplate,Paragraph,Spacer,Image,PageBreak,KeepTogether
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.colors import HexColor,Color,white
 from reportlab.pdfbase import pdfmetrics
@@ -14,6 +14,7 @@ from pypdf import PdfReader,PdfWriter
 from storage import resolve
 from forms import materialize
 from photos import cropped
+from personal import details,signature_image
 TEMPLATES={
  'Seitenleiste':dict(side=True,accent='#167c77',style='soft'),
  'Graphit':dict(side=True,accent='#455477',style='soft'),
@@ -72,7 +73,10 @@ def page_footer(c,doc,p,color):
 def letter_pdf(p,a,path):
  st=styles(a);conf=settings(a);story=[para(p['name'] or 'Dein Name',st['name']),para(' · '.join(filter(None,[p['email'],p['phone']]))+'\n'+p['address'],st['small'])]
  blocks(story,a['recipient'] or a['company'],st['body']);story.append(Spacer(1,8));story.append(para(', '.join(filter(None,[a['location'],a['date']])),st['small']))
- story.append(para('Bewerbung als '+(a['position'] or 'Position'),st['role']));blocks(story,a['salutation'],st['body']);blocks(story,a['letter'],st['body']);story.append(para('Mit freundlichen Grüßen\n\n'+p['name'],st['body']))
+ story.append(para('Bewerbung als '+(a['position'] or 'Position'),st['role']));blocks(story,a['salutation'],st['body']);blocks(story,a['letter'],st['body']);ending=[para('Mit freundlichen Grüßen',st['body']),Spacer(1,8)]
+ if p.get('signature') and a['design'].get('signature',True):
+  stream,w,h=signature_image(p);im=Image(stream,width=w,height=h);im.hAlign='LEFT';ending.extend([im,Spacer(1,5)])
+ ending.append(para(p['name'],st['body']));story.append(KeepTogether(ending))
  def background(c,d):
   if conf['style'] not in ('plain','classic'):
    c.setStrokeColor(HexColor(conf['accent']));c.setLineWidth(3);c.line(46,813,550,813)
@@ -88,6 +92,7 @@ def cv_pdf(p,a,path):
   story+=[para(p['name'] or 'Dein Name',st['name'])]
   if p['title']:story.append(para(p['title'],st['role']))
   story.append(para(' · '.join(filter(None,[p['email'],p['phone']]))+'\n'+p['address'],st['small']))
+  if details(p):story.append(para(details(p),st['small']))
   sections(story,p,a,st,a['design']['order'])
   def bg(c,d):
    if conf['style']=='banner':
@@ -99,7 +104,7 @@ def cv_pdf(p,a,path):
   SimpleDocTemplate(str(path),pagesize=(595.28,841.89),leftMargin=46,rightMargin=46,topMargin=44,bottomMargin=48).build(story,onFirstPage=bg,onLaterPages=bg);return
  left=photo(p,a)
  contact='\n'.join(filter(None,[p['email'],p['phone'],p['address']]))
- for title,text in [('KONTAKT',contact),('KENNTNISSE',p['skills']),('SPRACHEN',p['languages'])]:
+ for title,text in [('KONTAKT',contact),('PERSÖNLICHES',details(p)),('KENNTNISSE',p['skills']),('SPRACHEN',p['languages'])]:
   if text.strip():left.append(para(title,st['sidehead']));blocks(left,text,st['side'])
  if not left:left=[para('KONTAKT',st['sidehead'])]
  main=[para('LEBENSLAUF',st['small']),para(p['name'] or 'Dein Name',st['name'])]

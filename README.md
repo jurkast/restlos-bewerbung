@@ -1,21 +1,27 @@
-# Restlos Bewerbung 0.7 – Beispielbibliothek
+# Restlos Bewerbung 0.8 – Persönliche Angaben und Unterschrift
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.7.0_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.8.0_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.7.0_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.8.0_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
 
-## Neu: Beispielbibliothek und Ausfüllhilfe
+## Neu in 0.8: Persönliche Angaben und Unterschrift
+
+Unter **Mein Profil → Kontakt & Foto** lassen sich Geburtsdatum, Geburtsort, Familienstand und Staatsangehörigkeit freiwillig ergänzen. Nur ausgefüllte Angaben erscheinen im Lebenslauf – bei Seitenleisten unter **Persönliches**, bei einspaltigen Vorlagen bei den Kontaktdaten. Das gilt auch für den Word-Export. Anschreiben und Deckblatt übernehmen diese zusätzlichen Angaben nicht.
+
+Unter **Anschreiben → Deine Unterschrift** kannst du ein Bild deiner Unterschrift (PNG, JPG oder WebP) hinzufügen. Verwende ein möglichst eng zugeschnittenes Bild mit transparentem oder weißem Hintergrund. Restlos kopiert das Original in die lokale Profilablage **Sonstiges**. Im Anschreiben erscheint es zwischen Grußformel und Name, auch im Word-Export und in der Gesamtmappe. Die Unterschrift lässt sich pro Bewerbung ausschalten. Beim Ersetzen oder Entfernen aus dem Profil bleibt das Original in der Ablage erhalten.
+
+## Beispielbibliothek und Ausfüllhilfe
 
 Unter **Anschreiben** öffnet **Passende Beispielantwort finden** die lokale Bibliothek mit 66 eigenständigen Vorschlägen für alle fünf Textabschnitte. Enthalten sind 15 Berufsfelder und acht Bewerbungssituationen, darunter Quereinstieg, Ausbildung, Praktikum und Wiedereinstieg. Suche und Filter lassen sich kombinieren; allgemeine Vorschläge bleiben dabei verfügbar.
 

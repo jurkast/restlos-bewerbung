@@ -5,6 +5,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from forms import materialize
 from photos import cropped
+from personal import details,signature_image
 from pdf_export import settings,LABELS
 
 def make_docx(s,a,path,kind='cv'):
@@ -23,11 +24,14 @@ def make_docx(s,a,path,kind='cv'):
  if kind=='letter':
   head();add(a['recipient'] or a['company']);add(', '.join(filter(None,[a['location'],a['date']])));add('Bewerbung als '+a['position'],'Heading 1');add(a['salutation'])
   for block in a['letter'].split('\n\n'):add(block)
-  add('Mit freundlichen Grüßen\n\n'+p['name'])
+  closing=add('Mit freundlichen Grüßen');closing.paragraph_format.keep_with_next=True
+  if p.get('signature') and a['design'].get('signature',True):
+   stream,w,h=signature_image(p);par=doc.add_paragraph();par.paragraph_format.keep_with_next=True;par.add_run().add_picture(stream,width=Pt(w),height=Pt(h))
+  add(p['name'])
  elif kind=='cover':
   add('Bewerbung','Title');add(a['position'],'Heading 1');add(a['company']);head(True)
  else:
-  head(True);add(p['title'])
+  head(True);add(p['title']);add(details(p))
   for key in a['design']['order']:
    value=p.get(key,'').strip()
    if not value:continue

@@ -112,6 +112,18 @@ def launch():
     if action=='export_prompt':
      from assistant_local import prompt
      text=prompt(s,a);persist(s,a['id']);dest=application_dir(p,a)/'Exporte'/('Texthilfe-Prompt_'+uuid.uuid4().hex[:8]+'.txt');write(dest,text);self.notice('Prompt lokal gespeichert: '+str(dest));return
+    if action=='signature_preview':
+     from personal import signature_image
+     self.emit({'type':'signature_preview','profileId':s['selectedProfile'],'image':base64.b64encode(signature_image(s['profile'])[0].getvalue()).decode() if s['profile'].get('signature') else ''});return
+    if action=='signature':
+     source,_=QFileDialog.getOpenFileName(self.win,'Unterschrift auswählen',str(Path.home()),'Bilder (*.png *.jpg *.jpeg *.webp)')
+     if not source:return
+     from PIL import Image
+     if Path(source).stat().st_size>20*1024**2:raise ValueError('Bitte ein Bild unter 20 MB verwenden.')
+     with Image.open(source) as im:
+      if im.width*im.height>30000000:raise ValueError('Bitte ein Bild mit höchstens 30 Megapixeln verwenden.')
+      im.load()
+     d=document_copy(s,source,'Sonstiges');s['profile']['signature']=d['path'];persist(s,a['id']);self.state(s);return
     if action=='photo':
      source,_=QFileDialog.getOpenFileName(self.win,'Bewerbungsfoto auswählen',str(Path.home()),'Bilder (*.jpg *.jpeg *.png *.webp)')
      if not source:return

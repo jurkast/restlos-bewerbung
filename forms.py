@@ -5,7 +5,7 @@ def ensure(p,a=None):
  f.setdefault('contactMode','form' if not p.get('address','').strip() else 'text')
  for k in ('street','postcode','city','country'):f.setdefault(k,'')
  for key in SECTIONS:f.setdefault(key,{'mode':'form' if not p.get(key,'').strip() else 'text','rows':[]})
- for k in ('summary','projects','hobbies','photo'):p.setdefault(k,'')
+ for k in ('summary','projects','hobbies','photo','birthDate','birthPlace','maritalStatus','nationality','signature'):p.setdefault(k,'')
  p.setdefault('photoSettings',{'zoom':1,'x':0.5,'y':0.5,'shape':'portrait'})
  if a is not None:
   a.setdefault('tracking',{'deadline':'','followup':'','sent':'','notes':''})
@@ -15,6 +15,7 @@ def ensure(p,a=None):
   for k in ('contact','street','postcode','city','fit','availability'):af.setdefault(k,'')
   af.setdefault('closing','Über die Gelegenheit zu einem persönlichen Gespräch freue ich mich.')
   a.setdefault('design',{'accent':'','font':'Sans','size':10,'photo':True,'cover':False,'order':['summary','experience','education','projects','skills','languages','hobbies']})
+  a['design'].setdefault('signature',True)
  return f
 
 def date_text(value):
@@ -45,6 +46,14 @@ def materialize(p,a=None):
 
 def validate_forms(p,a=None):
  f=ensure(p,a)
+ from personal import FIELDS
+ from datetime import date
+ if any(not isinstance(p[k],str) for k in (*FIELDS,'signature')):raise ValueError('Ungültige persönliche Angaben.')
+ if p['birthDate']:
+  try:birth=date.fromisoformat(p['birthDate'])
+  except ValueError:raise ValueError('Bitte ein gültiges Geburtsdatum eingeben.')
+  if birth>date.today():raise ValueError('Das Geburtsdatum darf nicht in der Zukunft liegen.')
+ if a is not None and not isinstance(a['design']['signature'],bool):raise ValueError('Ungültige Unterschriftoption.')
  if f['contactMode'] not in ('form','text') or any(not isinstance(f[k],str) for k in ('street','postcode','city','country')):raise ValueError('Ungültige Kontaktfelder.')
  for key in SECTIONS:
   sec=f[key]
