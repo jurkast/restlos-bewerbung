@@ -22,6 +22,8 @@ def ensure(p,a=None):
   a['design'].setdefault('cvSignature',False)
   a['design'].setdefault('letterLayout','standard')
   af.setdefault('attachmentText','')
+  # 0.12: own subject and text for the e-mail draft ('' = standard text).
+  af.setdefault('mailSubject','');af.setdefault('mailText','')
   # Existing own salutations stay; the neutral default follows the contact person.
   af.setdefault('salutationMode','auto' if a.get('salutation','').strip() in ('','Sehr geehrte Damen und Herren,') else 'text')
  return f
@@ -90,7 +92,7 @@ def validate_forms(p,a=None):
     except ValueError:raise ValueError('Bitte ein gültiges Datum für die Bewerbungsplanung eingeben.')
   af=a['form'];d=a['design']
   if af.get('recipientMode') not in ('form','text') or af.get('letterMode') not in ('form','text'):raise ValueError('Ungültiger Eingabemodus.')
-  if any(not isinstance(af.get(k),str) for k in ('contact','street','postcode','city','fit','availability','closing','attachmentText')):raise ValueError('Ungültige Anschreibenfelder.')
+  if any(not isinstance(af.get(k),str) for k in ('contact','street','postcode','city','fit','availability','closing','attachmentText','mailSubject','mailText')):raise ValueError('Ungültige Anschreibenfelder.')
   if af.get('salutationMode') not in ('auto','text'):raise ValueError('Ungültiger Anredemodus.')
   if any(not isinstance(d.get(k),bool) for k in ('attachmentList','cvSignature')):raise ValueError('Ungültige Dokumentoption.')
   if d.get('letterLayout') not in ('standard','din5008'):raise ValueError('Ungültiges Briefformat.')

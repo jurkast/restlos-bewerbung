@@ -15,12 +15,24 @@ def pdf_report(path,s,a):
  if text_pages<len(r.pages):warnings.append('Einige Seiten enthalten nur Bilder. Das ist bei gescannten Anlagen möglich.')
  return {'type':'export_report','path':str(path),'pages':len(r.pages),'mb':round(Path(path).stat().st_size/1024**2,2),'textPages':text_pages,'warnings':warnings}
 
+def default_subject(a):
+ position=a['position'].strip()
+ return 'Bewerbung als '+position if position else 'Bewerbung'
+
+def default_mail_text(a):
+ position=a['position'].strip()
+ return 'anbei erhalten Sie meine Bewerbungsunterlagen'+(' für die Position als '+position if position else '')+'.\n\nÜber die Gelegenheit zu einem persönlichen Gespräch freue ich mich.'
+
+def mail_body(s,a):
+ form=a.get('form',{})
+ text=(form.get('mailText') or '').strip() or default_mail_text(a)
+ return a['salutation']+'\n\n'+text+'\n\nMit freundlichen Grüßen\n'+s['profile']['name']
+
 def mail_draft(path,pdf,s,a):
  msg=EmailMessage(policy=SMTP);recipient=str(a.get('recipientEmail') or '').strip()
  if recipient:msg['To']=recipient
  if s['profile']['email'].strip():msg['From']=s['profile']['email'].strip()
- position=a['position'].strip()
- msg['Subject']='Bewerbung als '+position if position else 'Bewerbung';msg['X-Unsent']='1'
- msg.set_content(a['salutation']+'\n\nanbei erhalten Sie meine Bewerbungsunterlagen'+(' für die Position als '+position if position else '')+'.\n\nÜber die Gelegenheit zu einem persönlichen Gespräch freue ich mich.\n\nMit freundlichen Grüßen\n'+s['profile']['name'])
+ msg['Subject']=(a.get('form',{}).get('mailSubject') or '').strip() or default_subject(a);msg['X-Unsent']='1'
+ msg.set_content(mail_body(s,a))
  msg.add_attachment(Path(pdf).read_bytes(),maintype='application',subtype='pdf',filename=('Bewerbung_'+re.sub(r'[^\w-]+','_',s['profile']['name'].strip()).strip('_')).rstrip('_')+'.pdf')
  Path(path).write_bytes(msg.as_bytes())
