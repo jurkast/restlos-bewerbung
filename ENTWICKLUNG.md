@@ -15,6 +15,17 @@ mkdir -p native
 
 `native/` kann leer bleiben, wenn die Grafikbibliotheken über das System installiert sind. Im ausgelieferten Runtime-Paket enthält es libxcb-cursor und dessen Lizenzhinweis. Das Programm lädt die Python-Bibliotheken aus `lib/`.
 
+## Automatisch veröffentlichen (GitHub Actions)
+
+Einmalig: Unter **Settings → Secrets and variables → Actions** das Secret `RESTLOS_SIGNING_KEY` mit dem vollständigen Inhalt des privaten Schlüssels anlegen.
+
+Danach genügt für jedes Update:
+
+1. `VERSION` erhöhen, Versionsanzeige (`settings.js`, `index.html`) und einen Abschnitt „## Neu in …“ im README ergänzen.
+2. Committen, pushen und einen passenden Tag setzen: `git tag v0.11.1 && git push origin main v0.11.1`. Alternativ unter **Actions → Release → Run workflow** starten.
+
+Der Workflow `.github/workflows/release.yml` installiert `lib/` und `native/`, führt die Tests aus, baut ZIP und DEB, signiert sie und veröffentlicht das Release. Die installierten Programme bieten es danach unter „Updates & Startcheck“ an.
+
 ## Eine Änderung als Update veröffentlichen
 
 1. Änderung implementieren und testen (`python3 -m pytest tests`; die Tests verwenden eigene temporäre Datenordner). `VERSION` erhöhen, beispielsweise von `0.6.0` auf `0.6.1`.
