@@ -15,3 +15,18 @@ settings.json
 data*.json
 Profile/
 Sicherungen/
+# Never commit personal application data
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.tif
+*.tiff
+*.odt
+*.doc
+*.xlsx
+*.pem
+!update-public.pem
+.restlos.lock
+Exporte/
+Bewerbungen/

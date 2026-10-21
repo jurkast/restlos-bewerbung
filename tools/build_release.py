@@ -9,6 +9,27 @@ if args.key.resolve().is_relative_to(root):raise SystemExit('Keep the private si
 args.output.mkdir(parents=True,exist_ok=True)
 # Explicit source file types; never include profiles, data folders, logs or private keys.
 files=[p for p in root.iterdir() if p.is_file() and (p.suffix in ('.py','.js','.html','.md','.svg','.sh') or p.name in ('VERSION','update-public.pem','requirements.txt','LICENSE'))]
+# Privacy: in a git checkout only files under version control are packaged, so personal notes,
+# exports or application data lying around in the program folder can never end up in a release.
+try:
+ tracked=set(subprocess.run(['git','-C',str(root),'ls-files'],capture_output=True,text=True,check=True).stdout.splitlines())
+except (OSError,subprocess.CalledProcessError):tracked=None
+if tracked:files=[p for p in files if p.name in tracked]
+
+def privacy_check(app):
+ """Stop the build if anything that looks like personal data is about to be published."""
+ allowed={'.py','.js','.html','.md','.svg','.sh','.ttf','.txt'}
+ problems=[]
+ for p in app.rglob('*'):
+  rel=p.relative_to(app)
+  if rel.parts[0] in ('lib','native') or not p.is_file():continue
+  if any(x in ('Profile','Sicherungen','Exporte','Bewerbungen') for x in rel.parts):problems.append(str(rel))
+  elif p.suffix.lower() not in allowed and p.name not in ('VERSION','update-public.pem','LICENSE'):problems.append(str(rel))
+  elif p.suffix.lower()!='.ttf':
+   text=p.read_text(encoding='utf-8',errors='ignore')
+   if re.search(r'-----BEGIN [A-Z ]*PRIVATE KEY-----',text) or re.search(r'"selectedProfile"\s*:\s*"',text):problems.append(str(rel))
+ if problems:raise SystemExit('Datenschutz-Prüfung: Diese Dateien gehören nicht in ein Release: '+', '.join(sorted(problems)))
+
 with tempfile.TemporaryDirectory(prefix='restlos-release-') as td:
  stage=Path(td)/'package';app=stage/'opt/restlos-bewerbung';app.mkdir(parents=True)
  for p in files:shutil.copy2(p,app/p.name)
@@ -18,6 +39,7 @@ with tempfile.TemporaryDirectory(prefix='restlos-release-') as td:
   source=args.runtime/name
   if not source.is_dir():raise SystemExit('Missing runtime '+str(source))
   shutil.copytree(source,app/name,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
+ privacy_check(app)
  archive=args.output/('restlos-bewerbung-'+v+'.zip')
  with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
   for p in sorted(app.rglob('*')):

@@ -22,7 +22,7 @@ def env(tmp_path, monkeypatch):
 
 def sample(storage, initiative=True, position=''):
     s = storage.initial()
-    s['profile'].update(name='Max Muster', email='max@example.org', phone='0171', address='Weg 1\n12345 Ort')
+    s['profile'].update(name='Max Muster', email='max@example.org', phone='0123', address='Weg 1\n12345 Ort')
     a = s['applications'][0]
     a.update(company='Müller GmbH', position=position, motivation='Ich möchte Ihr Team unterstützen.', evidence='Fünf Jahre Lager.', initiative=initiative)
     a['form']['recipientMode'] = 'text'; a['recipient'] = ''

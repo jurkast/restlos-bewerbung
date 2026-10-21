@@ -56,6 +56,15 @@ Erst ein veröffentlichtes Release wird vom Updater angeboten. Ein Commit allein
 
 Der private Schlüssel darf niemals mit hochgeladen oder durch einen neu generierten ersetzt werden: bestehende Installationen vertrauen dem ausgelieferten öffentlichen Schlüssel. Den privaten Schlüssel separat sichern. Ohne ihn können bestehende Installationen keine neuen Updates akzeptieren.
 
+## Datenschutz bei Releases
+
+- Persönliche Daten liegen ausschließlich unter `~/Documents/Restlos Bewerbung/` und nie im Programm- oder Repository-Ordner.
+- `tools/build_release.py` packt in einem Git-Checkout nur Dateien, die versioniert sind. Lose Dateien im Programmordner (Notizen, Exporte) kommen nie in ein Release.
+- Vor dem Packen prüft das Skript das Paket: Profile-, Sicherungs- oder Bewerbungsordner, PDFs, Bilder, Word-/E-Mail-Dateien, private Schlüssel oder gespeicherte Restlos-Daten stoppen den Bau.
+- `tests/test_privacy.py` prüft dasselbe für das Repository; der Release-Workflow führt den Test vor jedem Bau aus.
+- Testdaten verwenden nur erfundene Angaben (Max Muster, Musterweg 1, 12345 Musterstadt).
+- Für Commits die anonyme GitHub-Adresse verwenden (`ID+benutzer@users.noreply.github.com`).
+
 ## Daten und Rollback
 
 Das Programm speichert persönliche Dateien getrennt unter `~/Documents/Restlos Bewerbung/`. Tests verwenden `RESTLOS_DATA_DIR`, `RESTLOS_LEGACY_DIR` und `RESTLOS_UPDATE_DIR` mit isolierten Testverzeichnissen. Neue Versionen müssen Daten weiterhin kompatibel lesen und schreiben; ein Programm-Rollback ersetzt keine Datenmigration rückwärts. Vor Updates erstellt der Updater eine lokale ZIP-Sicherung.
