@@ -1,21 +1,31 @@
-# Restlos Bewerbung 0.8 – Persönliche Angaben und Unterschrift
+# Restlos Bewerbung 0.9 – Unterschrift eintippen, zeichnen oder hochladen
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.8.0_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.9.0_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.8.0_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.9.0_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
 
-## Neu in 0.8: Persönliche Angaben und Unterschrift
+## Neu in 0.9: Drei Wege zur Unterschrift
+
+Unter **Anschreiben → Deine Unterschrift → Unterschrift hinzufügen/ersetzen** öffnet sich die Auswahl:
+
+- **Eintippen:** Namen eingeben, zwischen drei mitgelieferten Schriftarten wählen und eine Farbe festlegen. Die Vorschau wird sofort angepasst.
+- **Zeichnen:** Mit Maus, Trackpad oder Finger auf der weißen Fläche unterschreiben. Einzelne Striche zurücknehmen oder die Fläche leeren. Farbauswahl ebenfalls verfügbar.
+- **Hochladen:** Ein eigenes PNG-, JPG- oder WebP-Bild auswählen und übernehmen.
+
+Eingetippte und gezeichnete Unterschriften werden erst mit **Unterschrift einfügen** als PNG in der lokalen Profilablage gespeichert. Abbrechen erhält die vorhandene Unterschrift. Beim Upload übernimmt die erfolgreiche Dateiauswahl das Bild. Die erzeugten Bilder erscheinen genauso wie hochgeladene Unterschriften in PDF und Word. Die Schriftarten werden lokal mitgeliefert; ihre Lizenzen stehen in `SIGNATURE-FONT-LICENSES.md`.
+
+## Seit 0.8: Persönliche Angaben und Unterschrift
 
 Unter **Mein Profil → Kontakt & Foto** lassen sich Geburtsdatum, Geburtsort, Familienstand und Staatsangehörigkeit freiwillig ergänzen. Nur ausgefüllte Angaben erscheinen im Lebenslauf – bei Seitenleisten unter **Persönliches**, bei einspaltigen Vorlagen bei den Kontaktdaten. Das gilt auch für den Word-Export. Anschreiben und Deckblatt übernehmen diese zusätzlichen Angaben nicht.
 

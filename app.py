@@ -115,6 +115,9 @@ def launch():
     if action=='signature_preview':
      from personal import signature_image
      self.emit({'type':'signature_preview','profileId':s['selectedProfile'],'image':base64.b64encode(signature_image(s['profile'])[0].getvalue()).decode() if s['profile'].get('signature') else ''});return
+    if action=='signature_create':
+     from personal import save_created_signature
+     save_created_signature(s,req.get('image'));persist(s,a['id']);self.state(s);return
     if action=='signature':
      source,_=QFileDialog.getOpenFileName(self.win,'Unterschrift auswählen',str(Path.home()),'Bilder (*.png *.jpg *.jpeg *.webp)')
      if not source:return

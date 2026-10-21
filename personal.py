@@ -18,3 +18,26 @@ def signature_image(p):
   out=BytesIO();im.save(out,format='PNG');out.seek(0)
   width=min(150,45*im.width/im.height);height=width*im.height/im.width
   return out,width,height
+
+
+def save_created_signature(s,encoded):
+ import base64,binascii,tempfile
+ from pathlib import Path
+ from PIL import Image
+ from storage import document_copy
+ prefix='data:image/png;base64,'
+ if not isinstance(encoded,str) or not encoded.startswith(prefix) or len(encoded)>4000000:raise ValueError('Ungültiges Unterschriftbild.')
+ try:raw=base64.b64decode(encoded[len(prefix):],validate=True)
+ except (ValueError,binascii.Error):raise ValueError('Ungültige Bilddaten.')
+ with Image.open(BytesIO(raw)) as source:
+  if source.format!='PNG' or source.width>2400 or source.height>1000:raise ValueError('Unterschriftbild ist zu groß oder hat ein falsches Format.')
+  im=source.convert('RGBA');bounds=im.getchannel('A').getbbox()
+  if not bounds:raise ValueError('Bitte zuerst eine Unterschrift eingeben oder zeichnen.')
+  im=im.crop(bounds)
+  from PIL import ImageOps
+  im=ImageOps.expand(im,border=10,fill=(255,255,255,0))
+  with tempfile.TemporaryDirectory(prefix='restlos-signature-') as td:
+   file=Path(td)/'Unterschrift.png';im.save(file)
+   document=document_copy(s,file,'Sonstiges')
+ s['profile']['signature']=document['path']
+ return document
