@@ -7,6 +7,7 @@ from personal import details,signature_image
 from studio import cv_profile
 from storage import resolve
 from pdf_export import LABELS
+from letters import attachment_lines,wants_attachment_list,place_date
 
 def make_docx(s,a,path,kind='cv'):
  if kind not in ('cv','letter','cover'):raise ValueError('Für Word bitte Lebenslauf, Anschreiben oder Deckblatt wählen.')
@@ -28,6 +29,12 @@ def make_docx(s,a,path,kind='cv'):
   if p.get('signature') and a['design'].get('signature',True) and resolve(p['signature']).is_file():
    stream,w,h=signature_image(p,a);par=doc.add_paragraph();par.paragraph_format.keep_with_next=True;par.add_run().add_picture(stream,width=Pt(w),height=Pt(h))
   add(p['name'])
+  if wants_attachment_list(a):
+   owner=next((x for x in s.get('profiles',[]) if x.get('id')==s.get('selectedProfile')),None)
+   lines=attachment_lines(owner['documents'] if owner else [],a)
+   if lines:
+    head_par=add('Anlagen');head_par.runs[0].bold=True;head_par.paragraph_format.space_before=Pt(14);head_par.paragraph_format.keep_with_next=True
+    add('\n'.join(lines))
  elif kind=='cover':
   add('Bewerbung','Title');add(a['position'],'Heading 1');add(a['company']);head(True)
  else:
@@ -45,4 +52,11 @@ def make_docx(s,a,path,kind='cv'):
      par=add(lines[0]);par.runs[0].bold=True;par.paragraph_format.keep_with_next=len(lines)>1
      if len(lines)>1:add('\n'.join(lines[1:]))
     else:add(block)
+  if a['design'].get('cvSignature'):
+   # Place, date, signature and name at the end of the CV (0.11).
+   line=add(place_date(p,a))
+   if line:line.paragraph_format.space_before=Pt(18);line.paragraph_format.keep_with_next=True
+   if p.get('signature') and resolve(p['signature']).is_file():
+    stream,w,h=signature_image(p,a);par=doc.add_paragraph();par.paragraph_format.keep_with_next=True;par.add_run().add_picture(stream,width=Pt(w),height=Pt(h))
+   add(p['name'])
  doc.save(path)
