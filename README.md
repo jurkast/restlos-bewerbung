@@ -231,4 +231,8 @@ Restlos arbeitet ohne Onlinekonto und überträgt keine Bewerbungsdaten an einen
 
 Getestet mit Beispieldaten: signierte Updatevorbereitung, lokale Sicherung, Startbestätigung, Rückkehr bei Startfehler, abgelehnte Signatur/Prüfsumme/Pfade, Verhalten bei fehlender Verbindung sowie Speichern beim Schließen; Planung und Suchfilter, lokale KI-Schnittstelle mit Testserver, Modellfilter, Fehlerantworten, Vorschau/Übernahme/Wiederherstellung von Texten; OCR aus Bild und Scan-PDF, drei DOCX-Ausgaben einschließlich visueller Prüfung, EML-PDF-Anhang, Kopierfunktion und Exportbericht im Desktop-Fenster; zwölf Layouts mit Foto, Fotoausschnitte, Formulardaten und automatische Platzierung, lange mehrseitige Lebensläufe, Deckblatt und Gesamtmappe, Desktop-Bedienung, Rechtschreibkorrekturen, Migration älterer Texte, Speicherung und ZIP-Wiederherstellung.
 
-Quellcode liegt im Programmordner. Bibliothekslizenzen: `THIRD-PARTY.md` und `lib/*dist-info/`.
+## Lizenz
+
+Restlos Bewerbung steht unter der **MIT-Lizenz** (siehe `LICENSE`): Nutzung, Veränderung und Weitergabe sind erlaubt, solange der Copyright- und Lizenzhinweis erhalten bleibt. Das Programm wird ohne Gewährleistung bereitgestellt. Die mitgelieferten Bibliotheken und Schriftarten behalten ihre eigenen Lizenzen: `THIRD-PARTY.md`, `SIGNATURE-FONT-LICENSES.md` und `lib/*dist-info/`.
+
+Quellcode liegt im Programmordner.

@@ -8,7 +8,7 @@ if not re.fullmatch(r'\d+\.\d+\.\d+',v):raise SystemExit('Invalid version')
 if args.key.resolve().is_relative_to(root):raise SystemExit('Keep the private signing key outside the program source tree.')
 args.output.mkdir(parents=True,exist_ok=True)
 # Explicit source file types; never include profiles, data folders, logs or private keys.
-files=[p for p in root.iterdir() if p.is_file() and (p.suffix in ('.py','.js','.html','.md','.svg','.sh') or p.name in ('VERSION','update-public.pem','requirements.txt'))]
+files=[p for p in root.iterdir() if p.is_file() and (p.suffix in ('.py','.js','.html','.md','.svg','.sh') or p.name in ('VERSION','update-public.pem','requirements.txt','LICENSE'))]
 with tempfile.TemporaryDirectory(prefix='restlos-release-') as td:
  stage=Path(td)/'package';app=stage/'opt/restlos-bewerbung';app.mkdir(parents=True)
  for p in files:shutil.copy2(p,app/p.name)
