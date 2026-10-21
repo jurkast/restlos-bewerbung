@@ -112,7 +112,7 @@ Restlos lädt ausschließlich Programmupdates aus den öffentlichen Releases von
 - Eine neue Version, die beim ersten Start die Oberfläche nicht erreicht, wird beim nächsten Start zurückgenommen. Unter **Updates & Startcheck** kannst du auch selbst zur vorherigen Programmversion wechseln. Dabei werden automatische Updates vorerst ausgeschaltet. Deine Daten werden dadurch nicht auf einen alten Stand zurückgesetzt.
 - Ohne Internet oder bei einer ungültigen Aktualisierung bleibt die vorhandene Version nutzbar.
 
-**Es gibt keinen Upload deiner Bewerbungsdaten.** GitHub erhält beim Abruf der öffentlichen Update-Dateien die üblichen Verbindungsdaten, etwa IP-Adresse und Zeitpunkt. Profile, Anhänge und lokale Sicherungen werden nicht an GitHub gesendet. Eine zusätzliche Sicherung auf einem zweiten Datenträger bleibt sinnvoll.
+**Es gibt keinen Upload deiner Bewerbungsdaten.** Releases werden automatisch auf personenbezogene Dateien geprüft; ein Fund stoppt den Bau. GitHub erhält beim Abruf der öffentlichen Update-Dateien die üblichen Verbindungsdaten, etwa IP-Adresse und Zeitpunkt. Profile, Anhänge und lokale Sicherungen werden nicht an GitHub gesendet. Eine zusätzliche Sicherung auf einem zweiten Datenträger bleibt sinnvoll.
 
 Quellcodeänderungen werden erst ausgeliefert, wenn daraus eine signierte Version erstellt und als GitHub Release veröffentlicht wurde. Der private Signierschlüssel gehört weder ins Repository noch in die veröffentlichten Pakete.
 

@@ -24,15 +24,15 @@ def env(tmp_path, monkeypatch):
 def sample(storage, tmp):
     from PIL import Image
     s = storage.initial(); p = storage.selected(s); pr = p['profile']
-    pr.update(name='Max Muster', email='max@example.org', phone='0171 234', title='Lagerist', birthDate='1994-03-14')
-    pr['form'].update(street='Lindenweg 4', postcode='59755', city='Arnsberg')
-    pr['form']['experience']['rows'] = [dict(start='2021-04', end='', current=True, title='Fachkraft Lager', organization='Spedition Meier', city='Arnsberg', details='- Wareneingang\n- Inventur')]
+    pr.update(name='Max Muster', email='max@example.org', phone='0123 456', title='Lagerist', birthDate='1994-03-14')
+    pr['form'].update(street='Musterweg 1', postcode='12345', city='Musterstadt')
+    pr['form']['experience']['rows'] = [dict(start='2021-04', end='', current=True, title='Fachkraft Lager', organization='Spedition Meier', city='Musterstadt', details='- Wareneingang\n- Inventur')]
     pr['form']['skills']['rows'] = [dict(name='SAP', level='sehr gut'), dict(name='Stapler', level='vorhanden')]
     pr['form']['languages']['rows'] = [dict(name='Englisch', level='B2')]
     Image.new('RGB', (400, 500), 'gray').save(tmp / 'foto.jpg')
     pr['photo'] = storage.document_copy(s, tmp / 'foto.jpg', 'Fotos')['path']
     a = s['applications'][0]
-    a.update(company='Müller GmbH', position='Lagerist', location='Arnsberg', date='21.10.2026', motivation='Ich will.', evidence='Ich kann.')
+    a.update(company='Müller GmbH', position='Lagerist', location='Musterstadt', date='21.10.2026', motivation='Ich will.', evidence='Ich kann.')
     storage.persist(s, a['id'], generate=False)
     return s, a
 
@@ -92,7 +92,7 @@ def test_long_cv_flows_over_pages(env):
     f = s['profile']['form']
     f['experience']['rows'] = [dict(start='2010-01', end='2012-01', current=False, title='Station %d' % i, organization='Firma', city='',
                                     details='\n'.join('- Aufgabe %d' % j for j in range(45 if i == 0 else 4))) for i in range(5)]
-    s['profile']['name'] = 'Alexandra-Maximiliane von Hohenberg-Lüdenscheidt'
+    s['profile']['name'] = 'Maximiliane-Theresa von Beispielhausen-Musterberg'
     storage.persist(s, a['id'], generate=False)
     from pdf_export import make_pdf
     from pypdf import PdfReader
@@ -102,7 +102,7 @@ def test_long_cv_flows_over_pages(env):
         pages = PdfReader(tmp / 'cv.pdf').pages
         # the experience section starts on page 1 instead of leaving it empty
         assert 'Station 0' in pages[0].extract_text() and len(pages) >= 2
-        assert 'Hohenberg-Lüdenscheidt' in pages[0].extract_text().replace('\n', ' ')
+        assert 'Beispielhausen-Musterberg' in pages[0].extract_text().replace('\n', ' ')
 
 
 AD = """Müller Logistik GmbH
@@ -111,7 +111,7 @@ Fachkraft für Lagerlogistik (m/w/d) in Vollzeit
 Bewerbungen bitte bis zum 15.11.2026 an:
 Ihre Ansprechpartnerin: Frau Dr. Anna von Berg
 Industriestraße 12
-59821 Arnsberg
+12399 Musterstadt
 bewerbung@mueller-logistik.de"""
 
 
@@ -120,10 +120,10 @@ def test_job_ad_suggestions():
     got = suggest(AD, today=date(2026, 10, 21))
     assert got == {'position': 'Fachkraft für Lagerlogistik', 'company': 'Müller Logistik GmbH', 'contact': 'Frau Dr. Anna von Berg',
                    'recipientEmail': 'bewerbung@mueller-logistik.de', 'deadline': '2026-11-15', 'street': 'Industriestraße 12',
-                   'postcode': '59821', 'city': 'Arnsberg'}
-    other = suggest('Die Stadtwerke Arnsberg AG sucht ab sofort einen Elektroniker für Betriebstechnik (w/m/d).\n'
-                    'Kontakt: Herr Klaus Weber\nAm Markt 5, 59755 Arnsberg\nBewerbungsschluss: 30. November', today=date(2026, 10, 21))
-    assert other['position'] == 'Elektroniker für Betriebstechnik' and other['company'] == 'Stadtwerke Arnsberg AG'
+                   'postcode': '12399', 'city': 'Musterstadt'}
+    other = suggest('Die Stadtwerke Musterstadt AG sucht ab sofort einen Elektroniker für Betriebstechnik (w/m/d).\n'
+                    'Kontakt: Herr Klaus Weber\nAm Markt 5, 12345 Musterstadt\nBewerbungsschluss: 30. November', today=date(2026, 10, 21))
+    assert other['position'] == 'Elektroniker für Betriebstechnik' and other['company'] == 'Stadtwerke Musterstadt AG'
     assert other['contact'] == 'Herr Klaus Weber' and other['deadline'] == '2026-11-30' and other['street'] == 'Am Markt 5'
     assert suggest('') == {}
 

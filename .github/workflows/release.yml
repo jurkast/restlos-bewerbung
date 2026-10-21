@@ -98,7 +98,7 @@ jobs:
         if: steps.version.outputs.build == 'true'
         run: |
           python3 -m pip install --quiet pytest
-          python3 -m pytest -q tests/test_fixes.py tests/test_v011.py tests/test_v012.py tests/test_v013.py
+          python3 -m pytest -q tests/test_fixes.py tests/test_v011.py tests/test_v012.py tests/test_v013.py tests/test_privacy.py
           python3 tests/test_updates.py
 
       - name: Signiertes Release bauen

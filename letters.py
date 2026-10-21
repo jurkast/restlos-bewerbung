@@ -75,7 +75,7 @@ def wants_attachment_list(a):
 
 
 def place_date(p, a):
-    """'Arnsberg, 21.10.2026' for the end of the CV."""
+    """'Musterstadt, 21.10.2026' for the end of the CV."""
     place = a.get('location', '').strip() or p.get('form', {}).get('city', '').strip()
     return ', '.join(x for x in (place, a.get('date', '').strip()) if x)
 

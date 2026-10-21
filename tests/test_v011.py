@@ -37,10 +37,10 @@ def env(tmp_path, monkeypatch):
 def sample(storage, tmp):
     from reportlab.pdfgen import canvas
     s = storage.initial(); p = storage.selected(s)
-    p['profile'].update(name='Max Muster', email='max@example.org', phone='0171 234')
-    p['profile']['form'].update(street='Lindenweg 4', postcode='59755', city='Arnsberg')
+    p['profile'].update(name='Max Muster', email='max@example.org', phone='0123 456')
+    p['profile']['form'].update(street='Musterweg 1', postcode='12345', city='Musterstadt')
     a = s['applications'][0]
-    a.update(company='Müller Logistik GmbH', position='Lagerist', location='Arnsberg', date='21.10.2026', motivation='Ich will.', evidence='Ich kann.')
+    a.update(company='Müller Logistik GmbH', position='Lagerist', location='Musterstadt', date='21.10.2026', motivation='Ich will.', evidence='Ich kann.')
     c = canvas.Canvas(str(tmp / 'Arbeitszeugnis_Spedition_Meier.pdf')); c.drawString(100, 700, 'Zeugnis'); c.save()
     a['attachments'].append(storage.document_copy(s, tmp / 'Arbeitszeugnis_Spedition_Meier.pdf', 'Zeugnisse')['path'])
     storage.persist(s, a['id'], generate=False)
@@ -120,20 +120,20 @@ def test_cv_place_date_signature(env, template):
     from pdf_export import make_pdf
     a['template'] = template
     make_pdf(s, a, tmp / 'cv0.pdf', 'cv', False)
-    assert 'Arnsberg, 21.10.2026' not in pdf_text(tmp / 'cv0.pdf')
+    assert 'Musterstadt, 21.10.2026' not in pdf_text(tmp / 'cv0.pdf')
     a['design']['cvSignature'] = True
     make_pdf(s, a, tmp / 'cv.pdf', 'cv', False)
-    assert 'Arnsberg, 21.10.2026' in pdf_text(tmp / 'cv.pdf')
+    assert 'Musterstadt, 21.10.2026' in pdf_text(tmp / 'cv.pdf')
     from word_export import make_docx
     make_docx(s, a, tmp / 'cv.docx', 'cv')
     from docx import Document
-    assert any(p.text == 'Arnsberg, 21.10.2026' for p in Document(tmp / 'cv.docx').paragraphs)
+    assert any(p.text == 'Musterstadt, 21.10.2026' for p in Document(tmp / 'cv.docx').paragraphs)
 
 
 def test_din5008_address_field_position(env):
     storage, tmp = env
     s, a = sample(storage, tmp)
-    a['form'].update(contact='Frau Müller', street='Industriestraße 12', postcode='59821', city='Arnsberg')
+    a['form'].update(contact='Frau Müller', street='Industriestraße 12', postcode='12399', city='Musterstadt')
     a['design']['letterLayout'] = 'din5008'
     storage.persist(s, a['id'], generate=False)
     from pdf_export import make_pdf
@@ -144,7 +144,7 @@ def test_din5008_address_field_position(env):
         if text.strip():
             found.setdefault(text.strip(), (tm[4] / 72 * 25.4, 297 - tm[5] / 72 * 25.4))
     PdfReader(tmp / 'din.pdf').pages[0].extract_text(visitor_text=visit)
-    for line in ('Müller Logistik GmbH', 'Frau Müller', 'Industriestraße 12', '59821 Arnsberg'):
+    for line in ('Müller Logistik GmbH', 'Frau Müller', 'Industriestraße 12', '12399 Musterstadt'):
         x, y = found[line]
         assert abs(x - 25) < 0.5 and 62.7 < y < 90, (line, x, y)   # Anschriftzone, form B
     sender = next(v for k, v in found.items() if k.startswith('Max Muster ·'))
