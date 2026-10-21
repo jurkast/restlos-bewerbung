@@ -8,6 +8,18 @@ PARTICLES = {'von', 'van', 'de', 'der', 'den', 'zu', 'vom', 'zur', 'ten', 'ter',
 LAYOUTS = ('standard', 'din5008')
 
 
+def is_initiative(a):
+    return bool(a.get('initiative'))
+
+
+def subject_line(a):
+    """Subject of letter and e-mail: 'Bewerbung als …' or, for an unsolicited application,
+    'Initiativbewerbung als …' / 'Initiativbewerbung'."""
+    position = a.get('position', '').strip()
+    kind = 'Initiativbewerbung' if is_initiative(a) else 'Bewerbung'
+    return kind + ' als ' + position if position else kind
+
+
 def contact_person(a):
     """Contact line used for the salutation: the form field, or in free-text mode
     the first recipient line that starts with Frau/Herr."""

@@ -5,8 +5,8 @@ let remindersShown=false,exportItems=null,jobSuggestion=null;
 // ---- defaults for new fields (keep in sync with forms.py / delivery.py)
 const workflowEnsure=ensureForms;
 ensureForms=function(){workflowEnsure();for(const a of state.applications){a.form.mailSubject??='';a.form.mailText??='';}};
-function defaultMailSubject(a){let p=(a.position||'').trim();return p?'Bewerbung als '+p:'Bewerbung';}
-function defaultMailText(a){let p=(a.position||'').trim();return 'anbei erhalten Sie meine Bewerbungsunterlagen'+(p?' für die Position als '+p:'')+'.\n\nÜber die Gelegenheit zu einem persönlichen Gespräch freue ich mich.';}
+function defaultMailSubject(a){let p=(a.position||'').trim(),kind=a.initiative?'Initiativbewerbung':'Bewerbung';return p?kind+' als '+p:kind;}
+function defaultMailText(a){let p=(a.position||'').trim();if(a.initiative)return 'anbei erhalten Sie meine Initiativbewerbung'+(p?' als '+p:'')+'. Ich würde mich freuen, Ihr Team zu unterstützen, und stehe Ihnen für Rückfragen gern zur Verfügung.\n\nÜber die Gelegenheit zu einem persönlichen Gespräch freue ich mich.';return 'anbei erhalten Sie meine Bewerbungsunterlagen'+(p?' für die Position als '+p:'')+'.\n\nÜber die Gelegenheit zu einem persönlichen Gespräch freue ich mich.';}
 
 // ---- 1. reminders when the program starts
 function addDays(day,n){let d=new Date(day+'T12:00:00');d.setDate(d.getDate()+n);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}

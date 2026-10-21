@@ -28,7 +28,7 @@ def models():return [m['name'] for m in request('tags').get('models',[]) if loca
 
 def inputs(s,a):
  p=s['profile']
- return {'Position':a['position'],'Unternehmen':a['company'],'Stellenanzeige':a['job'],'Berufserfahrung':p['experience'],'Ausbildung':p['education'],'Kenntnisse':p['skills'],'Sprachen':p['languages'],'Motivation':a['motivation'],'Belege':a['evidence'],'Unternehmensbezug':a['form']['fit'],'Verfügbarkeit':a['form']['availability'],'Bisheriger Text':a['letter']}
+ return {'Art':'Initiativbewerbung ohne konkrete Stellenausschreibung' if a.get('initiative') else 'Bewerbung auf eine Stelle','Position':a['position'],'Unternehmen':a['company'],'Stellenanzeige':a['job'],'Berufserfahrung':p['experience'],'Ausbildung':p['education'],'Kenntnisse':p['skills'],'Sprachen':p['languages'],'Motivation':a['motivation'],'Belege':a['evidence'],'Unternehmensbezug':a['form']['fit'],'Verfügbarkeit':a['form']['availability'],'Bisheriger Text':a['letter']}
 
 def fingerprint(s,a):return hashlib.sha256(json.dumps(inputs(s,a),ensure_ascii=False,sort_keys=True).encode()).hexdigest()
 
@@ -40,7 +40,7 @@ def prompt(s,a):
  return SYSTEM+'\n\nEINGABEDATEN:\n'+json.dumps(data,ensure_ascii=False,indent=2)
 
 def generate(s,a,model):
- if not a['position'].strip():raise ValueError('Bitte zuerst die gewünschte Position ergänzen.')
+ if not a['position'].strip() and not a.get('initiative'):raise ValueError('Bitte zuerst die gewünschte Position ergänzen.')
  if not (a['motivation'].strip() or a['evidence'].strip() or s['profile']['experience'].strip() or s['profile']['education'].strip()):raise ValueError('Bitte zuerst eigene Motivation, Erfahrung oder Ausbildung ergänzen.')
  text=prompt(s,a)
  if model not in models():raise ValueError('Bitte ein installiertes lokales GGUF-Textmodell auswählen. Cloud-Modelle sind ausgeschlossen.')
