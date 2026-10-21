@@ -17,6 +17,13 @@ def ensure(p,a=None):
   a.setdefault('design',{'accent':'','font':'Sans','size':10,'photo':True,'cover':False,'order':['summary','experience','education','projects','skills','languages','hobbies']})
   a['design'].setdefault('signature',True)
   a['design'].setdefault('signatureScale',100)
+  # 0.11: enclosure list, place/date/signature below the CV, DIN 5008 letter layout.
+  a['design'].setdefault('attachmentList',True)
+  a['design'].setdefault('cvSignature',False)
+  a['design'].setdefault('letterLayout','standard')
+  af.setdefault('attachmentText','')
+  # Existing own salutations stay; the neutral default follows the contact person.
+  af.setdefault('salutationMode','auto' if a.get('salutation','').strip() in ('','Sehr geehrte Damen und Herren,') else 'text')
  return f
 
 def date_text(value):
@@ -42,6 +49,9 @@ def materialize(p,a=None):
  if a is not None:
   af=a['form']
   if af['recipientMode']=='form':a['recipient']='\n'.join(x.strip() for x in [a['company'],af['contact'],af['street'],' '.join(x for x in [af['postcode'],af['city']] if x)] if x.strip())
+  if af.get('salutationMode')=='auto':
+   from letters import salutation_for,contact_person
+   a['salutation']=salutation_for(contact_person(a))
   if af['letterMode']=='form':a['letter']='\n\n'.join(x.strip() for x in [a['motivation'],a['evidence'],af['fit'],af['availability'],af['closing']] if x.strip())
  return p
 
@@ -80,7 +90,10 @@ def validate_forms(p,a=None):
     except ValueError:raise ValueError('Bitte ein gültiges Datum für die Bewerbungsplanung eingeben.')
   af=a['form'];d=a['design']
   if af.get('recipientMode') not in ('form','text') or af.get('letterMode') not in ('form','text'):raise ValueError('Ungültiger Eingabemodus.')
-  if any(not isinstance(af.get(k),str) for k in ('contact','street','postcode','city','fit','availability','closing')):raise ValueError('Ungültige Anschreibenfelder.')
+  if any(not isinstance(af.get(k),str) for k in ('contact','street','postcode','city','fit','availability','closing','attachmentText')):raise ValueError('Ungültige Anschreibenfelder.')
+  if af.get('salutationMode') not in ('auto','text'):raise ValueError('Ungültiger Anredemodus.')
+  if any(not isinstance(d.get(k),bool) for k in ('attachmentList','cvSignature')):raise ValueError('Ungültige Dokumentoption.')
+  if d.get('letterLayout') not in ('standard','din5008'):raise ValueError('Ungültiges Briefformat.')
   import re
   if d.get('accent') and not re.fullmatch(r'#[0-9a-fA-F]{6}',d['accent']):raise ValueError('Ungültige Farbe.')
   if d.get('font') not in ('Sans','Serif') or d.get('size') not in (9,10,11):raise ValueError('Ungültige Schrift.')

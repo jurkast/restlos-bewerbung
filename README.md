@@ -1,19 +1,29 @@
-# Restlos Bewerbung 0.10.1 – Bewerbungen individuell fertigstellen
+# Restlos Bewerbung 0.11 – Bewerbungen individuell fertigstellen
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.10.1_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.11.0_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.10.1_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.11.0_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
+
+## Neu in 0.11: Briefformat, Anrede, Anlagen und Update per Klick
+
+1. **Automatische Anrede:** Unter **Anschreiben → Anrede** ist „Automatisch“ voreingestellt. Aus der Ansprechperson unter „Stelle“ wird die passende Anrede: „Frau Dr. Anna von Berg“ ergibt „Sehr geehrte Frau Dr. von Berg,“, „Herr Max Schmidt“ ergibt „Sehr geehrter Herr Schmidt,“. Ohne Frau/Herr bleibt es bei „Sehr geehrte Damen und Herren,“. Bei frei geschriebener Empfängeranschrift wird die erste Zeile mit Frau/Herr verwendet. „Eigene Anrede“ erlaubt einen beliebigen Text. Bestehende Bewerbungen mit einer eigenen Anrede behalten diese.
+2. **Anlagenverzeichnis:** Unter dem Namen im Anschreiben steht automatisch „Anlagen“ mit Lebenslauf und den Anlagen dieser Bewerbung (aus den Dateinamen, z. B. „Arbeitszeugnis Spedition Meier“). Die Liste lässt sich unter **Anschreiben → Anlagenverzeichnis** abschalten oder durch eine eigene Liste ersetzen. Gilt für PDF, Word und die Textdatei.
+3. **Ort, Datum und Unterschrift unter dem Lebenslauf:** In **Gestaltung → Briefformat und Abschluss** einschaltbar. Ort und Datum kommen aus „Stelle“, die Unterschrift aus „Anschreiben → Deine Unterschrift“. In allen zwölf Vorlagen und im Word-Export.
+4. **Anschreiben nach DIN 5008:** In **Gestaltung → Format des Anschreibens** „DIN 5008 (Fensterumschlag)“ wählen. Die Anschrift steht im Adressfeld nach Form B (45 mm von oben, Text bei 25 mm vom linken Rand) und passt in Fensterumschläge DIN lang und C6. Darüber steht eine kleine Absenderzeile, das Datum rechts, am linken Rand Falz- und Lochmarken. Der Bewerbungscheck warnt bei mehr als sechs Anschriftzeilen. Die Word-Ausgabe bleibt einspaltig.
+5. **Update per Klick:** Ist ein Update vorbereitet, erscheint unten rechts „Jetzt neu starten und aktualisieren“ (ebenso unter **Updates & Startcheck**). Restlos speichert alles, schließt sich und startet sofort mit der neuen Version.
+
+Alle Neuerungen kommen über das normale Programmupdate; ein neues Installationspaket ist nicht nötig. Ältere Versionen können die Daten weiterhin öffnen (die neuen Optionen werden dort nicht angewendet).
 
 ## Neu in 0.10.1: Fehlerbehebungen
 

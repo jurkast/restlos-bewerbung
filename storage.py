@@ -206,7 +206,9 @@ def persist(s,active_id=None,generate=True):
    profile_dir(p)
    for a in p['applications']:
     ap=application_dir(p,a);write_changed(ap/'Bewerbung.json',json.dumps(a,ensure_ascii=False,indent=2))
-    write_changed(ap/'Anschreiben/Anschreiben.txt',a['salutation']+'\n\n'+a['letter']+'\n\nMit freundlichen Grüßen\n'+p['profile']['name'])
+    from letters import attachment_lines,wants_attachment_list
+    enclosures='\n\nAnlagen\n'+'\n'.join(attachment_lines(p['documents'],a)) if wants_attachment_list(a) else ''
+    write_changed(ap/'Anschreiben/Anschreiben.txt',a['salutation']+'\n\n'+a['letter']+'\n\nMit freundlichen Grüßen\n'+p['profile']['name']+enclosures)
     cv=__import__('studio').cv_profile(p['profile'],a)
     write_changed(ap/'Lebenslauf/Lebenslauf.txt','\n\n'.join(cv[k] for k in PROFILE_FIELDS)+'\n\n'+__import__('personal').details(cv))
     sync_attachments(a,ap)

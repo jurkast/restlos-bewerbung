@@ -123,6 +123,9 @@ def application_check(s,a,check_size=True):
  words=company_words(a['company'])
  if words and a['recipient'] and not any(w in a['recipient'].lower() for w in words):add('Unternehmen und Empfängeranschrift stimmen möglicherweise nicht überein.','stelle','recipient')
  if not a['letter'].strip():add('Anschreibentext fehlt.','text','letter')
+ if a['design'].get('letterLayout')=='din5008':
+  from letters import recipient_lines
+  if len(recipient_lines(a))>6:add('Die Empfängeranschrift hat mehr als 6 Zeilen und passt so nicht vollständig ins Adressfeld nach DIN 5008.','stelle','recipient')
  for d in missing_documents(selected(s)):add('Datei fehlt oder ist verknüpft: '+d['name'],'documents')
  for rel in a['attachments']:
   if not resolve(rel).is_file():add('Zugeordnete Anlage fehlt: '+Path(rel).name,'documents')

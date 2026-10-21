@@ -14,7 +14,7 @@ def launch():
  from PySide6.QtWidgets import QApplication,QMainWindow,QFileDialog,QMessageBox
  from PySide6.QtWebEngineWidgets import QWebEngineView
  from PySide6.QtWebEngineCore import QWebEnginePage,QWebEngineScript,QWebEngineUrlRequestInterceptor
- from PySide6.QtCore import QUrl,QTimer,QObject,Signal,QLockFile
+ from PySide6.QtCore import QUrl,QTimer,QObject,Signal,QLockFile,QProcess
  from PySide6.QtGui import QIcon,QDesktopServices
  qapp=QApplication(sys.argv);qapp.setApplicationName('Restlos Bewerbung');qapp.setDesktopFileName('restlos-bewerbung');qapp.setWindowIcon(QIcon(str(ROOT/'icon.svg')))
  private_dir(DATA);lock=QLockFile(str(DATA/'.restlos.lock'))
@@ -109,8 +109,8 @@ def launch():
      return
     s=absorb(req['data']);p=selected(s);a=next((x for x in s['applications'] if x['id']==req['id']),s['applications'][0])
     if action=='startup_ready':
-     from updates import startup_ready,config
-     startup_ready()
+     from updates import startup_ready,config,status as update_status
+     startup_ready();self.emit({'type':'update_status',**update_status()})
      if not hasattr(self,'updateTimer'):
       self.updateTimer=QTimer(self.win);self.updateTimer.setInterval(6*60*60*1000);self.updateTimer.timeout.connect(lambda:self.check_updates() if config()['automatic'] else None);self.updateTimer.start()
       if config()['automatic']:QTimer.singleShot(3000,self.check_updates)
@@ -123,6 +123,18 @@ def launch():
      from updates import save_config,status
      save_config(req.get('repository','').strip(),req.get('automatic',True));self.emit({'type':'update_status',**status()});self.notice('Update-Einstellungen gespeichert.');return
     if action=='update_check':self.check_updates();return
+    if action=='update_restart':
+     # Save everything, release the data lock and start the prepared version right away.
+     from updates import BASE,status as update_status
+     if not update_status().get('pending'):raise ValueError('Es ist kein vorbereitetes Update vorhanden.')
+     self.drain_pdfs();persist(s,a['id'])
+     launcher=BASE/'launch.py'
+     if not launcher.is_file():raise ValueError('Startdatei nicht gefunden: '+str(launcher))
+     lock.unlock()
+     started=QProcess.startDetached(sys.executable,[str(launcher)],str(BASE))
+     if not (started[0] if isinstance(started,tuple) else started):
+      lock.tryLock(100);raise ValueError('Restlos konnte nicht neu gestartet werden. Bitte das Programm schließen und wieder öffnen; das Update wird dann aktiviert.')
+     self.win.closing=True;self.win.close();return
     if action=='update_rollback':
      from updates import rollback,status
      rollback();self.emit({'type':'update_status',**status()});return
