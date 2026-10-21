@@ -21,6 +21,8 @@ def ensure(p,a=None):
   a['design'].setdefault('attachmentList',True)
   a['design'].setdefault('cvSignature',False)
   a['design'].setdefault('letterLayout','standard')
+  # 0.13: unsolicited application – position, job ad and recipient become optional.
+  a.setdefault('initiative',False)
   af.setdefault('attachmentText','')
   # 0.12: own subject and text for the e-mail draft ('' = standard text).
   af.setdefault('mailSubject','');af.setdefault('mailText','')
@@ -96,6 +98,7 @@ def validate_forms(p,a=None):
   if af.get('salutationMode') not in ('auto','text'):raise ValueError('Ungültiger Anredemodus.')
   if any(not isinstance(d.get(k),bool) for k in ('attachmentList','cvSignature')):raise ValueError('Ungültige Dokumentoption.')
   if d.get('letterLayout') not in ('standard','din5008'):raise ValueError('Ungültiges Briefformat.')
+  if not isinstance(a.get('initiative'),bool):raise ValueError('Ungültige Angabe zur Initiativbewerbung.')
   import re
   if d.get('accent') and not re.fullmatch(r'#[0-9a-fA-F]{6}',d['accent']):raise ValueError('Ungültige Farbe.')
   if d.get('font') not in ('Sans','Serif') or d.get('size') not in (9,10,11):raise ValueError('Ungültige Schrift.')

@@ -28,7 +28,7 @@ from forms import materialize
 from photos import cropped
 from personal import details, signature_image
 from studio import cv_profile, attachment_pdf
-from letters import attachment_lines, wants_attachment_list, place_date, return_address, recipient_lines
+from letters import attachment_lines, wants_attachment_list, place_date, return_address, recipient_lines, subject_line, is_initiative
 
 W, H = 595.28, 841.89
 MM = 72 / 25.4
@@ -535,7 +535,7 @@ def letter_ending(p, a, st, documents):
 
 
 def subject(a):
-    return 'Bewerbung als ' + a['position'].strip() if a['position'].strip() else 'Bewerbung'
+    return subject_line(a)
 
 
 def letter_head(p, a, st, conf, width):
@@ -869,12 +869,12 @@ def cover_pdf(p, a, path):
     _, display = families(a)
     margin = 56
     width = W - 2 * margin - 12
-    eyebrow = SectionTitle('Bewerbung als', st['body'].fontName + 'Semi', mix(accent, 0.6), 'plain', size=8.5,
+    eyebrow = SectionTitle(('Initiativbewerbung' if is_initiative(a) else 'Bewerbung') + (' als' if a['position'].strip() else ''), st['body'].fontName + 'Semi', mix(accent, 0.6), 'plain', size=8.5,
                            tracking=2, space_before=0, space_after=12)
     position = ParagraphStyle('pos', parent=st['name'], fontName=display + 'Bold', fontSize=34, leading=39,
                               textColor=white, spaceAfter=10)
     company = ParagraphStyle('comp', parent=st['role'], fontSize=14, leading=19, textColor=mix(accent, 0.75))
-    band = [eyebrow, para(a['position'] or 'Deine Position', position)]
+    band = [eyebrow, para(a['position'].strip() or (a['company'].strip() if is_initiative(a) else '') or 'Deine Position', position)]
     if a['company'].strip():
         band.append(para(a['company'], company))
     story = [HeaderBlock(band, accent, pad=(150, 0, 70, 0), bleed=(margin + 6, margin + 6, 40)), Spacer(1, 34)]

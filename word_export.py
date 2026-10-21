@@ -7,7 +7,7 @@ from personal import details,signature_image
 from studio import cv_profile
 from storage import resolve
 from pdf_export import LABELS
-from letters import attachment_lines,wants_attachment_list,place_date
+from letters import attachment_lines,wants_attachment_list,place_date,subject_line
 
 def make_docx(s,a,path,kind='cv'):
  if kind not in ('cv','letter','cover'):raise ValueError('Für Word bitte Lebenslauf, Anschreiben oder Deckblatt wählen.')
@@ -23,7 +23,7 @@ def make_docx(s,a,path,kind='cv'):
   add(p['name'] or 'Dein Name','Title')
   add(' · '.join(filter(None,[p['email'],p['phone']]))+'\n'+p['address'])
  if kind=='letter':
-  head();add(a['recipient'] or a['company']);add(', '.join(filter(None,[a['location'],a['date']])));add('Bewerbung als '+a['position'].strip() if a['position'].strip() else 'Bewerbung','Heading 1');add(a['salutation'])
+  head();add(a['recipient'] or a['company']);add(', '.join(filter(None,[a['location'],a['date']])));add(subject_line(a),'Heading 1');add(a['salutation'])
   for block in a['letter'].split('\n\n'):add(block)
   closing=add('Mit freundlichen Grüßen');closing.paragraph_format.keep_with_next=True
   if p.get('signature') and a['design'].get('signature',True) and resolve(p['signature']).is_file():

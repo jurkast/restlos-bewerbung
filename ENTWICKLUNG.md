@@ -19,10 +19,14 @@ mkdir -p native
 
 Einmalig: Unter **Settings → Secrets and variables → Actions** das Secret `RESTLOS_SIGNING_KEY` mit dem vollständigen Inhalt des privaten Schlüssels anlegen.
 
-Danach genügt für jedes Update:
+Danach läuft alles automatisch: **Jede Änderung an Programmdateien auf `main`** (zum Beispiel durch das Übernehmen eines Pull Requests) erzeugt ein neues Release.
 
-1. `VERSION` erhöhen, Versionsanzeige (`settings.js`, `index.html`) und einen Abschnitt „## Neu in …“ im README ergänzen.
-2. Committen und auf `main` pushen. Sobald sich `VERSION` auf `main` ändert, startet das Release automatisch. Alternativ einen Tag `v0.11.1` pushen oder unter **Actions → Release → Run workflow** starten. Gibt es das Release zur aktuellen Version schon, passiert nichts.
+- Wurde `VERSION` von Hand erhöht (z. B. auf `0.14.0`), wird genau diese Version veröffentlicht – sinnvoll für größere Neuerungen mit eigenem Abschnitt „## Neu in 0.14“ im README.
+- Wurde `VERSION` nicht erhöht, setzt der Workflow die letzte Stelle automatisch hoch (`0.13.0` → `0.13.1`), speichert das auf `main` und veröffentlicht. Die Release-Notizen bestehen dann aus den Commit-Nachrichten.
+- Änderungen nur an Dokumentation (`*.md`), Tests oder Workflows lösen kein Release aus.
+- Von Hand: **Actions → Release → Run workflow**.
+
+Die installierten Programme prüfen beim Start und danach stündlich, laden ein neues Release im Hintergrund, prüfen Signatur und Prüfsumme und aktivieren es beim nächsten Start oder sofort über „Jetzt neu starten und aktualisieren“.
 
 Der Workflow `.github/workflows/release.yml` installiert `lib/` und `native/`, führt die Tests aus, baut ZIP und DEB, signiert sie und veröffentlicht das Release. Die installierten Programme bieten es danach unter „Updates & Startcheck“ an.
 

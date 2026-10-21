@@ -1,19 +1,30 @@
-# Restlos Bewerbung 0.12 – Bewerbungen individuell fertigstellen
+# Restlos Bewerbung 0.13 – Bewerbungen individuell fertigstellen
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.12.0_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.13.0_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.12.0_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.13.0_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
+
+## Neu in 0.13: Initiativbewerbung
+
+Unter **Stelle** gibt es den Haken **„Initiativbewerbung – ich bewerbe mich ohne konkrete Stellenausschreibung“**:
+
+- Position (jetzt „Wunschposition oder Bereich“), Stellenanzeige, Empfängeranschrift und Unternehmen sind optional.
+- **Prüfen & Export** trennt jetzt „Bitte prüfen“ (z. B. eigener Name, E-Mail, Anschreibentext) von „Hinweise (optional)“. Fehlende Stellenangaben erscheinen bei Initiativbewerbungen nur als Hinweis; der Export ist ohne Umweg möglich.
+- Betreff in Anschreiben, Word, E-Mail und Deckblatt: „Initiativbewerbung“ bzw. „Initiativbewerbung als …“. Der Standardtext der E-Mail ist angepasst.
+- Die Beispielbibliothek zeigt zuerst die Vorschläge für Initiativbewerbungen; Entwurf und lokale Texthilfe funktionieren auch ohne Position.
+
+Bestehende Bewerbungen bleiben normale Bewerbungen, bis der Haken gesetzt wird.
 
 ## Neu in 0.12: Moderne Vorlagen und mehr Hilfe im Alltag
 
@@ -92,7 +103,7 @@ Vorhandene Texte werden standardmäßig ergänzt. Ersetzen ist ausdrücklich aus
 
 Für den Wechsel von 0.5 oder älter muss dieses DEB-Paket **einmalig** installiert werden. Danach ist die Updateprüfung standardmäßig aktiv. Unter **Updates & Startcheck** kannst du sie ausschalten oder eine Prüfung anstoßen.
 
-Restlos lädt ausschließlich Programmupdates aus den öffentlichen Releases von https://github.com/jurkast/restlos-bewerbung. Beim Start und alle sechs Stunden prüft es auf eine neuere Version. Signatur, Prüfsumme, Dateigröße, Programmkennung und Plattform müssen passen. Ein vollständiges Update wird im Benutzerverzeichnis vorbereitet und beim nächsten normalen Start aktiviert. Die laufende Arbeit wird nicht durch einen Neustart unterbrochen.
+Restlos lädt ausschließlich Programmupdates aus den öffentlichen Releases von https://github.com/jurkast/restlos-bewerbung. Beim Start und danach stündlich prüft es auf eine neuere Version. Signatur, Prüfsumme, Dateigröße, Programmkennung und Plattform müssen passen. Ein vollständiges Update wird im Benutzerverzeichnis vorbereitet und beim nächsten normalen Start aktiviert. Die laufende Arbeit wird nicht durch einen Neustart unterbrochen.
 
 - Bewerbungsdaten bleiben unter `~/Documents/Restlos Bewerbung/`.
 - Vor der Aktivierung entsteht dort unter **Sicherungen** eine vollständige lokale ZIP-Sicherung. Scheitert die Sicherung, wird das Update nicht aktiviert. Die fünf neuesten Sicherungen vor Updates bleiben erhalten; ältere werden automatisch entfernt.

@@ -106,12 +106,19 @@ def application_check(s,a,check_size=True):
  from storage import selected,resolve
  from pdf_export import make_pdf
  materialize(s['profile'],a);p=cv_profile(s['profile'],a);issues=[]
- def add(text,step='stelle',field=''):issues.append(dict(message=text,step=step,field=field))
+ initiative=bool(a.get('initiative'))
+ # level 'must': should be fixed before sending; 'hint': optional, e.g. for unsolicited applications.
+ def add(text,step='stelle',field='',level='must'):issues.append(dict(message=text,step=step,field=field,level=level))
  for key,label in [('name','Name'),('email','E-Mail'),('phone','Telefon'),('address','Adresse')]:
   if not p.get(key,'').strip():add(label+' fehlt.','profile',key)
  if p.get('email') and not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+',p['email']):add('E-Mail-Adresse bitte prüfen.','profile','email')
+ optional={'company':'Kein Unternehmen angegeben – bei einer Initiativbewerbung an mehrere Firmen möglich, ein konkreter Name wirkt aber persönlicher.',
+  'position':'Keine Position angegeben – der Betreff lautet dann „Initiativbewerbung“.',
+  'recipient':'Keine Empfängeranschrift – bei einer Initiativbewerbung per E-Mail nicht nötig.'}
  for key,label in [('company','Unternehmen'),('position','Position'),('recipient','Empfänger')]:
-  if not a.get(key,'').strip():add(label+' fehlt.','stelle',key)
+  if not a.get(key,'').strip():
+   if initiative:add(optional[key],'stelle',key,'hint')
+   else:add(label+' fehlt.','stelle',key)
  texts=[('text','letter',a['letter']),('stelle','recipient',a['recipient'])]+[('cv',k,p.get(k,'')) for k in CV_KEYS]
  for step,key,text in texts:
   if re.search(r'\[[^\]]+\]|\bTODO\b|\bXXX\b',text):add('Möglicher Platzhalter in „'+FIELD_LABELS.get(key,key)+'“.',step,key)
@@ -121,7 +128,7 @@ def application_check(s,a,check_size=True):
   company=other.get('company','').strip()
   if len(company)>3 and company.lower()!=a['company'].strip().lower() and company.lower() in a['letter'].lower():add('Im Anschreiben steht auch das Unternehmen „'+company+'“. Bitte prüfen.','text','letter')
  words=company_words(a['company'])
- if words and a['recipient'] and not any(w in a['recipient'].lower() for w in words):add('Unternehmen und Empfängeranschrift stimmen möglicherweise nicht überein.','stelle','recipient')
+ if words and a['recipient'] and not any(w in a['recipient'].lower() for w in words):add('Unternehmen und Empfängeranschrift stimmen möglicherweise nicht überein.','stelle','recipient','hint' if initiative else 'must')
  if not a['letter'].strip():add('Anschreibentext fehlt.','text','letter')
  if a['design'].get('letterLayout')=='din5008':
   from letters import recipient_lines
@@ -136,7 +143,7 @@ def application_check(s,a,check_size=True):
     path=Path(td)/'check.pdf';make_pdf(s,a,path)
     from pypdf import PdfReader
     report.update(mb=round(path.stat().st_size/1024**2,2),pages=len(PdfReader(path).pages))
-    if path.stat().st_size>5*1024**2:add('Die Gesamtmappe ist größer als 5 MB. Bitte die Vorgaben des Empfängers prüfen.','anlagen')
+    if path.stat().st_size>5*1024**2:add('Die Gesamtmappe ist größer als 5 MB. Bitte die Vorgaben des Empfängers prüfen.','anlagen','',level='hint')
   except Exception as e:add('Mappe konnte nicht vollständig erstellt werden: '+str(e),'anlagen')
  return report
 

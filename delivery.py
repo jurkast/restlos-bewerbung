@@ -9,18 +9,22 @@ def pdf_report(path,s,a):
  if Path(path).stat().st_size>5*1024**2:warnings.append('Die Datei ist größer als 5 MB. Prüfe die Vorgaben des Empfängers.')
  if re.search(r'\[[^\]]+\]|\bTODO\b|\bXXX\b',a['letter']):warnings.append('Im Anschreiben stehen möglicherweise noch Platzhalter.')
  if not s['profile']['name'].strip():warnings.append('Der Name fehlt.')
- if not a['company'].strip() or not a['position'].strip():warnings.append('Firma oder Position fehlt.')
+ if a.get('initiative'):
+  if not a['company'].strip():warnings.append('Hinweis: Kein Unternehmen angegeben (bei Initiativbewerbungen optional).')
+ elif not a['company'].strip() or not a['position'].strip():warnings.append('Firma oder Position fehlt.')
  if a['form']['letterMode']=='form' and (not a['motivation'].strip() or not a['evidence'].strip()):warnings.append('Einstieg oder Erfahrung im Anschreiben fehlt.')
  text_pages=sum(bool((p.extract_text() or '').strip()) for p in r.pages)
  if text_pages<len(r.pages):warnings.append('Einige Seiten enthalten nur Bilder. Das ist bei gescannten Anlagen möglich.')
  return {'type':'export_report','path':str(path),'pages':len(r.pages),'mb':round(Path(path).stat().st_size/1024**2,2),'textPages':text_pages,'warnings':warnings}
 
 def default_subject(a):
- position=a['position'].strip()
- return 'Bewerbung als '+position if position else 'Bewerbung'
+ from letters import subject_line
+ return subject_line(a)
 
 def default_mail_text(a):
  position=a['position'].strip()
+ if a.get('initiative'):
+  return 'anbei erhalten Sie meine Initiativbewerbung'+(' als '+position if position else '')+'. Ich würde mich freuen, Ihr Team zu unterstützen, und stehe Ihnen für Rückfragen gern zur Verfügung.\n\nÜber die Gelegenheit zu einem persönlichen Gespräch freue ich mich.'
  return 'anbei erhalten Sie meine Bewerbungsunterlagen'+(' für die Position als '+position if position else '')+'.\n\nÜber die Gelegenheit zu einem persönlichen Gespräch freue ich mich.'
 
 def mail_body(s,a):

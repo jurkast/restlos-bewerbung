@@ -112,7 +112,7 @@ def launch():
      from updates import startup_ready,config,status as update_status
      startup_ready();self.emit({'type':'update_status',**update_status()})
      if not hasattr(self,'updateTimer'):
-      self.updateTimer=QTimer(self.win);self.updateTimer.setInterval(6*60*60*1000);self.updateTimer.timeout.connect(lambda:self.check_updates() if config()['automatic'] else None);self.updateTimer.start()
+      self.updateTimer=QTimer(self.win);self.updateTimer.setInterval(60*60*1000);self.updateTimer.timeout.connect(lambda:self.check_updates() if config()['automatic'] else None);self.updateTimer.start()
       if config()['automatic']:QTimer.singleShot(3000,self.check_updates)
      return
     if action=='update_status':
