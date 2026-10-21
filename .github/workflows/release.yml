@@ -1,6 +1,10 @@
-# Builds, signs and publishes a Restlos Bewerbung release when the file VERSION changes on
-# main, when a version tag is pushed (e.g. v0.11.0) or when started by hand under "Actions".
-# If the release for the current VERSION already exists, nothing happens. The installed programs then
+# Builds, signs and publishes a Restlos Bewerbung release automatically whenever program
+# files change on main (e.g. after merging a pull request), when a version tag is pushed or
+# when started by hand under "Actions".
+#  - VERSION raised by hand (e.g. 0.14.0) → that version is released.
+#  - Program changed but VERSION not raised → the patch number is raised automatically
+#    (0.13.0 → 0.13.1), committed to main and released.
+#  - Only documentation/tests/workflow changed → nothing happens. The installed programs then
 # offer the update via "Updates & Startcheck".
 #
 # One-time setup: Settings → Secrets and variables → Actions → New repository secret
@@ -13,7 +17,6 @@ name: Release
 on:
   push:
     branches: [main]
-    paths: ['VERSION', '.github/workflows/release.yml']
     tags: ['v*.*.*']
   workflow_dispatch:
 
@@ -29,21 +32,40 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Version prüfen
+      - name: Version bestimmen
         id: version
         run: |
           VERSION="$(cat VERSION)"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v$VERSION" ]; then
             echo "::error::Tag ${GITHUB_REF_NAME} passt nicht zur Datei VERSION ($VERSION)."; exit 1
           fi
-          if gh release view "v$VERSION" >/dev/null 2>&1; then
-            echo "::notice::Release v$VERSION gibt es bereits – nichts zu tun."
-            echo "build=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "build=true" >> "$GITHUB_OUTPUT"
+          LATEST="$(gh release view --json tagName --jq .tagName 2>/dev/null | sed 's/^v//')"
+          if ! gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "Neue Version $VERSION aus der Datei VERSION."
+            echo "build=true" >> "$GITHUB_OUTPUT"; echo "version=$VERSION" >> "$GITHUB_OUTPUT"; echo "since=$LATEST" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          # Release exists already: only program changes since then lead to an automatic patch release.
+          CHANGED="$(git diff --name-only "v$VERSION" HEAD -- . ':(exclude)*.md' ':(exclude)tests/**' ':(exclude).github/**' ':(exclude).gitignore' || true)"
+          if [ -z "$CHANGED" ]; then
+            echo "::notice::Keine Programmänderung seit v$VERSION – kein neues Release."
+            echo "build=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "Geänderte Programmdateien:"; echo "$CHANGED"
+          NEXT="$(python3 -c "import sys;a,b,c=map(int,sys.argv[1].split('.'));print(f'{a}.{b}.{c+1}')" "$VERSION")"
+          while gh release view "v$NEXT" >/dev/null 2>&1; do
+            NEXT="$(python3 -c "import sys;a,b,c=map(int,sys.argv[1].split('.'));print(f'{a}.{b}.{c+1}')" "$NEXT")"
+          done
+          echo "$NEXT" > VERSION
+          sed -i "s/version:'$VERSION'/version:'$NEXT'/; s/version||'$VERSION'/version||'$NEXT'/" settings.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Version $NEXT (automatisches Release)"
+          git push origin HEAD:main
+          echo "build=true" >> "$GITHUB_OUTPUT"; echo "version=$NEXT" >> "$GITHUB_OUTPUT"; echo "since=$VERSION" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -99,15 +121,25 @@ jobs:
           short = re.sub(r'\.0$', '', v)
           text = open('README.md', encoding='utf-8').read()
           m = re.search(r'^## Neu in (?:' + re.escape(v) + '|' + re.escape(short) + r')\b.*?(?=^## )', text, re.S | re.M)
-          notes = m.group(0) if m else 'Restlos Bewerbung ' + v
+          if m:
+              notes = m.group(0)
+          else:
+              import subprocess, os
+              since = os.environ.get('SINCE', '')
+              log = subprocess.run(['git', 'log', '--no-merges', '--pretty=- %s', ('v' + since + '..HEAD') if since else 'HEAD~20..HEAD'],
+                                   capture_output=True, text=True).stdout.strip()
+              log = '\n'.join(l for l in log.splitlines() if 'automatisches Release' not in l)
+              notes = '## Restlos Bewerbung ' + v + '\n\n' + (log or 'Verbesserungen und Fehlerbehebungen.')
           open('RELEASE-NOTES.md', 'w', encoding='utf-8').write(notes + '\n\nDaten bleiben lokal. Installierte Versionen ab 0.6 aktualisieren sich über „Updates & Startcheck“.\n')
           PY
+        env:
+          SINCE: ${{ steps.version.outputs.since }}
 
       - name: Auf GitHub veröffentlichen
         if: steps.version.outputs.build == 'true'
         run: |
           V="${{ steps.version.outputs.version }}"
-          gh release create "v$V" --target "$GITHUB_SHA" dist/restlos-bewerbung-$V.zip dist/restlos-bewerbung_${V}_amd64.deb dist/restlos-update.json dist/restlos-update.sig \
+          gh release create "v$V" --target "$(git rev-parse HEAD)" dist/restlos-bewerbung-$V.zip dist/restlos-bewerbung_${V}_amd64.deb dist/restlos-update.json dist/restlos-update.sig \
             --title "Restlos Bewerbung $V" --notes-file RELEASE-NOTES.md --latest
         env:
           GH_TOKEN: ${{ github.token }}

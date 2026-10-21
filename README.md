@@ -103,7 +103,7 @@ Vorhandene Texte werden standardmäßig ergänzt. Ersetzen ist ausdrücklich aus
 
 Für den Wechsel von 0.5 oder älter muss dieses DEB-Paket **einmalig** installiert werden. Danach ist die Updateprüfung standardmäßig aktiv. Unter **Updates & Startcheck** kannst du sie ausschalten oder eine Prüfung anstoßen.
 
-Restlos lädt ausschließlich Programmupdates aus den öffentlichen Releases von https://github.com/jurkast/restlos-bewerbung. Beim Start und alle sechs Stunden prüft es auf eine neuere Version. Signatur, Prüfsumme, Dateigröße, Programmkennung und Plattform müssen passen. Ein vollständiges Update wird im Benutzerverzeichnis vorbereitet und beim nächsten normalen Start aktiviert. Die laufende Arbeit wird nicht durch einen Neustart unterbrochen.
+Restlos lädt ausschließlich Programmupdates aus den öffentlichen Releases von https://github.com/jurkast/restlos-bewerbung. Beim Start und danach stündlich prüft es auf eine neuere Version. Signatur, Prüfsumme, Dateigröße, Programmkennung und Plattform müssen passen. Ein vollständiges Update wird im Benutzerverzeichnis vorbereitet und beim nächsten normalen Start aktiviert. Die laufende Arbeit wird nicht durch einen Neustart unterbrochen.
 
 - Bewerbungsdaten bleiben unter `~/Documents/Restlos Bewerbung/`.
 - Vor der Aktivierung entsteht dort unter **Sicherungen** eine vollständige lokale ZIP-Sicherung. Scheitert die Sicherung, wird das Update nicht aktiviert. Die fünf neuesten Sicherungen vor Updates bleiben erhalten; ältere werden automatisch entfernt.
