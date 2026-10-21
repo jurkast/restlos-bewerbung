@@ -75,7 +75,7 @@ def letter_pdf(p,a,path):
  blocks(story,a['recipient'] or a['company'],st['body']);story.append(Spacer(1,8));story.append(para(', '.join(filter(None,[a['location'],a['date']])),st['small']))
  story.append(para('Bewerbung als '+(a['position'] or 'Position'),st['role']));blocks(story,a['salutation'],st['body']);blocks(story,a['letter'],st['body']);ending=[para('Mit freundlichen Grüßen',st['body']),Spacer(1,8)]
  if p.get('signature') and a['design'].get('signature',True):
-  stream,w,h=signature_image(p);im=Image(stream,width=w,height=h);im.hAlign='LEFT';ending.extend([im,Spacer(1,5)])
+  stream,w,h=signature_image(p,a);im=Image(stream,width=w,height=h);im.hAlign='LEFT';ending.extend([im,Spacer(1,5)])
  ending.append(para(p['name'],st['body']));story.append(KeepTogether(ending))
  def background(c,d):
   if conf['style'] not in ('plain','classic'):

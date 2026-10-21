@@ -16,6 +16,7 @@ def ensure(p,a=None):
   af.setdefault('closing','Über die Gelegenheit zu einem persönlichen Gespräch freue ich mich.')
   a.setdefault('design',{'accent':'','font':'Sans','size':10,'photo':True,'cover':False,'order':['summary','experience','education','projects','skills','languages','hobbies']})
   a['design'].setdefault('signature',True)
+  a['design'].setdefault('signatureScale',100)
  return f
 
 def date_text(value):
@@ -53,6 +54,7 @@ def validate_forms(p,a=None):
   try:birth=date.fromisoformat(p['birthDate'])
   except ValueError:raise ValueError('Bitte ein gültiges Geburtsdatum eingeben.')
   if birth>date.today():raise ValueError('Das Geburtsdatum darf nicht in der Zukunft liegen.')
+ if a is not None and (type(a['design']['signatureScale']) not in (int,float) or not 25<=a['design']['signatureScale']<=150):raise ValueError('Die Unterschriftgröße muss zwischen 25 und 150 Prozent liegen.')
  if a is not None and not isinstance(a['design']['signature'],bool):raise ValueError('Ungültige Unterschriftoption.')
  if f['contactMode'] not in ('form','text') or any(not isinstance(f[k],str) for k in ('street','postcode','city','country')):raise ValueError('Ungültige Kontaktfelder.')
  for key in SECTIONS:

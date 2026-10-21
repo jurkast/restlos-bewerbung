@@ -9,7 +9,7 @@ def details(p):
   if key=='birthDate' and value:value=date.fromisoformat(value).strftime('%d.%m.%Y')
   if value:rows.append(label+': '+value)
  return '\n'.join(rows)
-def signature_image(p):
+def signature_image(p,a=None):
  from storage import resolve
  from PIL import Image,ImageOps
  with Image.open(resolve(p['signature'])) as original:
@@ -17,7 +17,8 @@ def signature_image(p):
   im=ImageOps.exif_transpose(original).convert('RGBA');im.thumbnail((1200,600))
   out=BytesIO();im.save(out,format='PNG');out.seek(0)
   width=min(150,45*im.width/im.height);height=width*im.height/im.width
-  return out,width,height
+  scale=a.get('design',{}).get('signatureScale',100)/100 if a else 1
+  return out,width*scale,height*scale
 
 
 def save_created_signature(s,encoded):

@@ -1,21 +1,25 @@
-# Restlos Bewerbung 0.9 – Unterschrift eintippen, zeichnen oder hochladen
+# Restlos Bewerbung 0.9.1 – Unterschrift eintippen, zeichnen oder hochladen
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.9.0_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.9.1_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.9.0_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.9.1_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
 
-## Neu in 0.9: Drei Wege zur Unterschrift
+## Neu in 0.9.1: Größe der Unterschrift
+
+Unter **Anschreiben → Deine Unterschrift** lässt sich die Größe je Bewerbung zwischen **25 und 150 %** einstellen. **Kompakt · 65 %** verkleinert sie mit einem Klick. Die PDF-Vorschau und der PDF-/Word-Export verwenden dieselbe proportionale Skalierung. Bestehende Bewerbungen behalten zunächst ihre bisherige Größe (100 %). Die Originalbilddatei bleibt unverändert.
+
+## Seit 0.9: Drei Wege zur Unterschrift
 
 Unter **Anschreiben → Deine Unterschrift → Unterschrift hinzufügen/ersetzen** öffnet sich die Auswahl:
 

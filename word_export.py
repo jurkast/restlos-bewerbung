@@ -26,7 +26,7 @@ def make_docx(s,a,path,kind='cv'):
   for block in a['letter'].split('\n\n'):add(block)
   closing=add('Mit freundlichen Grüßen');closing.paragraph_format.keep_with_next=True
   if p.get('signature') and a['design'].get('signature',True):
-   stream,w,h=signature_image(p);par=doc.add_paragraph();par.paragraph_format.keep_with_next=True;par.add_run().add_picture(stream,width=Pt(w),height=Pt(h))
+   stream,w,h=signature_image(p,a);par=doc.add_paragraph();par.paragraph_format.keep_with_next=True;par.add_run().add_picture(stream,width=Pt(w),height=Pt(h))
   add(p['name'])
  elif kind=='cover':
   add('Bewerbung','Title');add(a['position'],'Heading 1');add(a['company']);head(True)
