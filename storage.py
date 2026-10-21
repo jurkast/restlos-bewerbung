@@ -87,10 +87,11 @@ def application_dir(p,a):
  base=profile_dir(p)/'Bewerbungen'
  name=clean((a['company'] or 'Neue Bewerbung')+' - '+(a['position'] or 'Entwurf'))+'_'+a['id'][:8]
  old=a.get('folder','')
- if not old:
-  matches=list(base.glob('*_'+a['id'][:8]))
-  if len(matches)==1: old=matches[0].name
  if old and Path(old).name!=old: raise ValueError('Ungültiger Bewerbungsordner.')
+ if not old or not (base/old).is_dir():
+  # The page may still know an older folder name after a rename: find the folder by its stable ID.
+  matches=sorted((m for m in base.glob('*_'+a['id'][:8]) if m.is_dir() and not m.is_symlink()),key=lambda m:m.stat().st_mtime,reverse=True)
+  if matches: old=next((m.name for m in matches if m.name==name),matches[0].name)
  if old and old!=name and (base/old).exists() and not (base/name).exists(): (base/old).rename(base/name)
  a['folder']=name
  path=private_dir(base/name)

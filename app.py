@@ -215,6 +215,16 @@ def launch():
        path=Path(td)/'packet.pdf';make_pdf(s,a,path)
        return {'type':'studio_packet','profileId':p['id'],'applicationId':a['id'],'token':req.get('token'),**render_pages(path,int(req.get('start',0)),1)}
      self.task(packet);return
+    if action=='job_parse':
+     from jobad import suggest as job_suggest
+     self.emit({'type':'job_parse','profileId':p['id'],'applicationId':a['id'],'fields':job_suggest(a['job'])});return
+    if action=='exports_scan':
+     from housekeeping import scan
+     self.save(s,a['id']);self.emit({'type':'exports_scan','profileId':p['id'],'items':scan(p)});return
+    if action=='exports_clean':
+     from housekeeping import scan,clean
+     result=clean(p,req.get('applications') or None)
+     self.emit({'type':'exports_scan','profileId':p['id'],'items':scan(p)});self.notice(str(result['removed'])+' ältere Export(e) gelöscht, '+str(result['mb']).replace('.',',')+' MB frei. Die neueste Fassung je Art ist erhalten.');return
     if action=='save':self.save(s,a['id']);self.emit({'type':'saved'});return
     if action=='spell':
      def check():

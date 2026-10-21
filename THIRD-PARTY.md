@@ -16,3 +16,8 @@ Poppler wird als installiertes Systemprogramm aufgerufen und ist nicht in diesem
 - python-docx: MIT. https://github.com/python-openxml/python-docx ; Lizenz in lib/python_docx-*.dist-info/licenses/.
 - lxml: BSD und Lizenzen der enthaltenen libxml2/libxslt-Komponenten. https://lxml.de/ ; Lizenztexte im Paket.
 - Tesseract: Apache-2.0, als Systemprogramm aufgerufen. https://github.com/tesseract-ocr/tesseract ; Sprachdaten werden über die Systempakete installiert.
+
+## Schriften für die PDF-Vorlagen (`fonts/`)
+
+- **Inter** – Copyright (c) 2016 The Inter Project Authors, SIL Open Font License 1.1 (`fonts/Inter-LICENSE.txt`), https://github.com/rsms/inter
+- **Source Serif 4** – Copyright 2014–2023 Adobe, SIL Open Font License 1.1 (`fonts/SourceSerif4-LICENSE.md`), https://github.com/adobe-fonts/source-serif

@@ -1,19 +1,28 @@
-# Restlos Bewerbung 0.11 – Bewerbungen individuell fertigstellen
+# Restlos Bewerbung 0.12 – Bewerbungen individuell fertigstellen
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.11.0_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.12.0_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.11.0_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.12.0_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
+
+## Neu in 0.12: Moderne Vorlagen und mehr Hilfe im Alltag
+
+1. **Moderne Gestaltung aller zwölf Vorlagen:** Neue Schriften (Inter und Source Serif 4, beide frei unter der SIL Open Font License und mitgeliefert), Abschnittsüberschriften mit Sperrschrift, eine **Zeitleiste** für Berufserfahrung und Ausbildung (Zeitraum links, Position, Firma und Aufgaben rechts; Zeilen mit „-“ werden zu Aufzählungspunkten), **Balken für Kenntnisse und Sprachen** (z. B. „sehr gut“, „B2“, „4/5“, „80 %“, „Muttersprache“; unbekannte Angaben bleiben als Text), Fotos mit abgerundeten Ecken, farbige Kopfbänder bei Horizont und Studio, ein neues **Deckblatt** mit großem Farbfeld und Inhaltsangabe sowie ein überarbeiteter Briefkopf im Anschreiben. Sehr lange Namen werden automatisch kleiner gesetzt. Fehlen die mitgelieferten Schriften, verwendet Restlos DejaVu.
+2. **Erinnerungen beim Start:** Fristen und Wiedervorlagen, die fällig sind oder in den nächsten drei Tagen anstehen, erscheinen beim Öffnen – über alle Profile. „Bewerbung öffnen“ springt direkt hinein.
+3. **Exporte aufräumen:** Unter **Sicherung & Daten** zeigt „Exporte prüfen“, wie viel Platz die datierten Exporte belegen. Ältere Fassungen lassen sich pro Bewerbung oder gesammelt löschen; die neueste Fassung je Art bleibt immer erhalten.
+4. **E-Mail-Text anpassbar:** Unter **Prüfen & Export** lassen sich Betreff und Text des E-Mail-Entwurfs ändern. Anrede, Grußformel und Name werden ergänzt.
+5. **Stellenanzeige auswerten:** Unter **Stelle** übernimmt „Angaben aus der Anzeige übernehmen“ nach Prüfung Firma, Position, Ansprechperson, Anschrift, Bewerbungs-E-Mail und Frist. Alles lokal; bereits ausgefüllte Felder werden nur überschrieben, wenn du sie anhakst.
+6. **Fehler behoben:** Wurden Firma oder Position in einer Sitzung mehrfach geändert, konnte ein zweiter Bewerbungsordner entstehen. Restlos findet den Ordner jetzt immer über die feste Bewerbungs-ID.
 
 ## Neu in 0.11: Briefformat, Anrede, Anlagen und Update per Klick
 

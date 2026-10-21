@@ -12,6 +12,8 @@ files=[p for p in root.iterdir() if p.is_file() and (p.suffix in ('.py','.js','.
 with tempfile.TemporaryDirectory(prefix='restlos-release-') as td:
  stage=Path(td)/'package';app=stage/'opt/restlos-bewerbung';app.mkdir(parents=True)
  for p in files:shutil.copy2(p,app/p.name)
+ # Bundled document fonts (SIL OFL) used by the PDF templates.
+ if (root/'fonts').is_dir():shutil.copytree(root/'fonts',app/'fonts',ignore=shutil.ignore_patterns('__pycache__'))
  for name in ('lib','native'):
   source=args.runtime/name
   if not source.is_dir():raise SystemExit('Missing runtime '+str(source))
