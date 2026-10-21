@@ -15,6 +15,7 @@ from storage import resolve
 from forms import materialize
 from photos import cropped
 from personal import details,signature_image
+from studio import cv_profile,attachment_pdf
 TEMPLATES={
  'Seitenleiste':dict(side=True,accent='#167c77',style='soft'),
  'Graphit':dict(side=True,accent='#455477',style='soft'),
@@ -40,19 +41,20 @@ def fonts():
   if name not in pdfmetrics.getRegisteredFontNames():pdfmetrics.registerFont(TTFont(name,'/usr/share/fonts/truetype/dejavu/'+file))
 
 def styles(a,light_text=False):
- d=a['design'];serif=d['font']=='Serif' or a['template']=='Klassisch';font='RestlosSerif' if serif else 'Restlos';bold=font+'Bold';color=HexColor(settings(a)['accent']);size=d['size']
- body=ParagraphStyle('body',fontName=font,fontSize=size,leading=size*1.52,spaceAfter=10,textColor=HexColor('#253843'),splitLongWords=True)
+ d=a['design'];serif=d['font']=='Serif' or a['template']=='Klassisch';font='RestlosSerif' if serif else 'Restlos';bold=font+'Bold';color=HexColor(settings(a)['accent']);size=d['size'];spacing=d.get('spacing',100)/100
+ body=ParagraphStyle('body',fontName=font,fontSize=size,leading=size*1.52*spacing,spaceAfter=10*spacing,textColor=HexColor('#253843'),splitLongWords=True)
  return {'body':body,'small':ParagraphStyle('small',parent=body,fontSize=8.5,leading=13,spaceAfter=12),
  'side':ParagraphStyle('side',parent=body,fontSize=9,leading=14,textColor=white if light_text else HexColor('#253843')),
  'sidehead':ParagraphStyle('sidehead',parent=body,fontName=bold,fontSize=9,leading=14,spaceBefore=15,spaceAfter=8,textColor=white if light_text else color,keepWithNext=True),
  'name':ParagraphStyle('name',parent=body,fontName=bold,fontSize=26,leading=32,textColor=color,spaceAfter=12),
  'role':ParagraphStyle('role',parent=body,fontName=bold,fontSize=12,leading=18,spaceAfter=16),
- 'section':ParagraphStyle('section',parent=body,fontName=bold,fontSize=12,leading=18,textColor=color,spaceBefore=15,spaceAfter=9,keepWithNext=True),
+ 'section':ParagraphStyle('section',parent=body,fontName=bold,fontSize=12,leading=18,textColor=color,spaceBefore=15*spacing,spaceAfter=9*spacing,keepWithNext=True),
  'station':ParagraphStyle('station',parent=body,fontName=bold,spaceAfter=6,keepWithNext=True)}
 
 def para(text,style):return Paragraph(escape(str(text)).replace('\n','<br/>'),style)
 def photo(p,a,width=130):
- if not p.get('photo') or not a['design']['photo']:return []
+ if not p.get('photo') or not a['design']['photo'] or not resolve(p['photo']).is_file():return []
+ width*=a['design'].get('photoScale',100)/100
  image=Image(cropped(p),width=width,height=width*(1.25 if p['photoSettings']['shape']=='portrait' else 1));image.hAlign='LEFT';return [image,Spacer(1,10)]
 def blocks(story,text,style):
  for block in text.split('\n\n'):
@@ -60,6 +62,7 @@ def blocks(story,text,style):
 def sections(story,p,a,st,keys):
  for key in keys:
   if not p.get(key,'').strip():continue
+  if key in a['design'].get('breakBefore',[]):story.append(PageBreak())
   story.append(para(LABELS[key],st['section']))
   if key in ('experience','education'):
    for block in p[key].split('\n\n'):
@@ -74,7 +77,7 @@ def letter_pdf(p,a,path):
  st=styles(a);conf=settings(a);story=[para(p['name'] or 'Dein Name',st['name']),para(' · '.join(filter(None,[p['email'],p['phone']]))+'\n'+p['address'],st['small'])]
  blocks(story,a['recipient'] or a['company'],st['body']);story.append(Spacer(1,8));story.append(para(', '.join(filter(None,[a['location'],a['date']])),st['small']))
  story.append(para('Bewerbung als '+(a['position'] or 'Position'),st['role']));blocks(story,a['salutation'],st['body']);blocks(story,a['letter'],st['body']);ending=[para('Mit freundlichen Grüßen',st['body']),Spacer(1,8)]
- if p.get('signature') and a['design'].get('signature',True):
+ if p.get('signature') and a['design'].get('signature',True) and resolve(p['signature']).is_file():
   stream,w,h=signature_image(p,a);im=Image(stream,width=w,height=h);im.hAlign='LEFT';ending.extend([im,Spacer(1,5)])
  ending.append(para(p['name'],st['body']));story.append(KeepTogether(ending))
  def background(c,d):
@@ -145,8 +148,10 @@ def make_pdf(s,a,path,kind='all',attachments=True):
    # Cover is optional; it precedes the letter, CV and attachments.
    for key,include,fn in [('cover',kind=='cover' or kind=='all' and a['design']['cover'],cover_pdf),('letter',kind in ('all','letter'),letter_pdf),('cv',kind in ('all','cv'),cv_pdf)]:
     if include:
-     file=Path(td)/(key+'.pdf');fn(p,a,file);files.append(file)
-   if kind=='all' and attachments:files.extend(resolve(n) for n in a['attachments'])
+     file=Path(td)/(key+'.pdf');fn(cv_profile(p,a) if key=='cv' else p,a,file);files.append(file)
+   if kind=='all' and attachments:
+    for i,rel in enumerate(a['attachments']):
+     file=Path(td)/('attachment-'+str(i)+'.pdf');attachment_pdf(a,rel,file);files.append(file)
    writer=PdfWriter()
    for f in files:writer.append(str(f))
    writer.add_metadata({'/Title':('Lebenslauf' if kind=='cv' else 'Bewerbung')+' – '+p['name'],'/Author':p['name']});writer.write(str(path));writer.close()

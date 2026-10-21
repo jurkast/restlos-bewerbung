@@ -49,7 +49,7 @@ def launch():
   def state(self,s):
    from photos import cropped
    photo=s['profile'].get('photo')
-   self.emit({'type':'load','data':s,'root':str(DATA),'folder':str(profile_dir(selected(s))),'photoPreview':base64.b64encode(cropped(s['profile']).getvalue()).decode() if photo else ''})
+   self.emit({'type':'load','data':s,'root':str(DATA),'folder':str(profile_dir(selected(s))),'photoPreview':base64.b64encode(cropped(s['profile']).getvalue()).decode() if photo and resolve(photo).is_file() else ''})
   def notice(self,text):self.emit({'type':'notice','text':text})
   def task(self,fn,pool=None):
    def run():
@@ -114,7 +114,7 @@ def launch():
      text=prompt(s,a);persist(s,a['id']);dest=application_dir(p,a)/'Exporte'/('Texthilfe-Prompt_'+uuid.uuid4().hex[:8]+'.txt');write(dest,text);self.notice('Prompt lokal gespeichert: '+str(dest));return
     if action=='signature_preview':
      from personal import signature_image
-     self.emit({'type':'signature_preview','profileId':s['selectedProfile'],'image':base64.b64encode(signature_image(s['profile'])[0].getvalue()).decode() if s['profile'].get('signature') else ''});return
+     self.emit({'type':'signature_preview','profileId':s['selectedProfile'],'image':base64.b64encode(signature_image(s['profile'])[0].getvalue()).decode() if s['profile'].get('signature') and resolve(s['profile']['signature']).is_file() else ''});return
     if action=='signature_create':
      from personal import save_created_signature
      save_created_signature(s,req.get('image'));persist(s,a['id']);self.state(s);return
@@ -139,6 +139,34 @@ def launch():
     if action=='photo_preview':
      from photos import cropped
      self.emit({'type':'photo_preview','profileId':s['selectedProfile'],'image':base64.b64encode(cropped(s['profile']).getvalue()).decode() if s['profile']['photo'] else ''});return
+    if action=='studio_check':
+     from studio import application_check
+     self.task(lambda:{'type':'studio_check','profileId':p['id'],'applicationId':a['id'],'token':req.get('token'),**application_check(s,a)});return
+    if action=='studio_audit':
+     from studio import audit_documents
+     self.emit({'type':'studio_audit','profileId':p['id'],'missing':audit_documents(s)});return
+    if action=='studio_repair':
+     from studio import repair_document,audit_documents
+     owner=next(x for x in s['profiles'] if x['id']==req.get('profileId',p['id']))
+     document=next(d for d in owner['documents'] if d['id']==req['document'])
+     source,_=QFileDialog.getOpenFileName(self.win,'Fehlende Datei wieder zuordnen: '+document['name'],str(Path.home()),'Passender Dateityp (*'+Path(document['name']).suffix+');;Alle Dateien (*)')
+     if not source:return
+     repair_document(owner,document['id'],source);persist(s,generate=False);self.state(s);self.emit({'type':'studio_audit','profileId':p['id'],'missing':audit_documents(s)});self.notice('Datei lokal wiederhergestellt. Bitte die Vorschau prüfen.');return
+    if action=='studio_text':
+     from studio import text_advice
+     self.emit({'type':'studio_text','profileId':p['id'],'applicationId':a['id'],'text':a['letter'],'issues':text_advice(a['letter'])});return
+    if action=='studio_pages':
+     from studio import render_pages
+     rel=req['document']
+     if rel not in a['attachments']:raise ValueError('Diese Anlage gehört nicht zur Bewerbung.')
+     self.task(lambda:{'type':'studio_pages','profileId':p['id'],'applicationId':a['id'],'document':rel,**render_pages(resolve(rel),int(req.get('start',0)),8,280)});return
+    if action=='studio_packet':
+     from studio import render_pages
+     def packet():
+      with tempfile.TemporaryDirectory() as td:
+       path=Path(td)/'packet.pdf';make_pdf(s,a,path)
+       return {'type':'studio_packet','profileId':p['id'],'applicationId':a['id'],'token':req.get('token'),**render_pages(path,int(req.get('start',0)),1)}
+     self.task(packet);return
     if action=='save':persist(s,a['id']);self.emit({'type':'saved'});return
     if action=='spell':
      def check():
@@ -149,7 +177,9 @@ def launch():
     if action=='preview':
      def preview():
       with tempfile.TemporaryDirectory() as td:
-       path=Path(td)/'preview.pdf';make_pdf(s,a,path,req.get('kind','all'),False)
+       path=Path(td)/'preview.pdf';preview_a=dict(a)
+       if req.get('baseProfile'):preview_a.pop('cv',None)
+       make_pdf(s,preview_a,path,req.get('kind','all'),False)
        count=len(PdfReader(path).pages)
        proc=subprocess.run(['pdftoppm','-f','1','-l','12','-scale-to','1050','-png',str(path),str(Path(td)/'page')],capture_output=True,timeout=45)
        if proc.returncode:raise ValueError('PDF-Vorschau konnte nicht gerendert werden.')

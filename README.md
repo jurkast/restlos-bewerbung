@@ -1,19 +1,32 @@
-# Restlos Bewerbung 0.9.1 – Unterschrift eintippen, zeichnen oder hochladen
+# Restlos Bewerbung 0.10 – Bewerbungen individuell fertigstellen
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.9.1_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.10.0_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.9.1_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.10.0_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
+
+## Neu in 0.10: Sechs Bereiche für die fertige Bewerbung
+
+1. **Eigener Lebenslauf:** Unter „Bewerbung bearbeiten → Lebenslauf“ eine eigene Fassung aktivieren. Berufliche Inhalte werden aus dem Profil übernommen und danach unabhängig bearbeitet. Kontakt, persönliche Angaben, Foto und Unterschrift bleiben gemeinsame Profildaten. Eigene Stationen werden als Text mit Leerzeilen zwischen den Stationen bearbeitet. Beim Ausschalten bleibt die eigene Fassung für eine spätere Aktivierung gespeichert. „Neu aus Profil übernehmen“ ersetzt sie nach Bestätigung.
+2. **Anlagen bearbeiten:** Anlagen per Ziehen oder Pfeilen sortieren. „Seiten bearbeiten“ öffnet Originalseiten als Vorschau; Seiten lassen sich drehen, entfernen und sortieren. Änderungen werden erst mit „Änderungen übernehmen“ gespeichert und gelten pro Bewerbung. „Zurücksetzen“ stellt alle Originalseiten wieder her. Es muss mindestens eine Seite erhalten bleiben; maximal 300 Seiten pro bearbeiteter Anlage. Die Original-PDF bleibt erhalten. Im Bewerbungsordner liegen nummerierte, bearbeitete Anlagenkopien.
+3. **Bewerbungscheck:** Vor PDF-, Word- oder E-Mail-Export werden Pflichtangaben, mögliche Platzhalter, erkannte Zeiträume und Hinweise auf andere Firmennamen geprüft. Die tatsächliche Gesamtmappe wird erzeugt, ihre Seitenzahl und Dateigröße angezeigt; ab 5 MB erscheint ein Hinweis. „Zum Abschnitt“ führt zurück zur Eingabe. Du entscheidest nach der Prüfung über den Export. Der Firmenabgleich erkennt bekannte Namen aus anderen Bewerbungen und Abweichungen zur Empfängeranschrift, nicht beliebige falsche Namen.
+4. **Dateiablage reparieren:** In „Dokumentablage → Fehlende Dateien suchen“ fehlende Originale aller Profile auflisten. „Datei wieder zuordnen“ kopiert eine von dir ausgewählte Datei desselben Typs an den hinterlegten Ort. Vorhandene Dateien werden nicht überschrieben. Speichern und Öffnen bleiben bei fehlenden Anlagen möglich; unvollständige Sicherungen/Updates werden weiterhin verhindert.
+5. **Textprüfung:** Lokale Regeln finden doppelte Wörter/Sätze, überlange Sätze, allgemeine Formulierungen, mehrfache Leerzeichen und ausgewählte häufige Sprachfehler. Vorschläge einzeln übernehmen; die vorherige Fassung wird gesichert. Bei einer Übernahme wechselt das Anschreiben zur freien Textbearbeitung. Dies ist **keine vollständige Grammatikprüfung**; die bestehende Rechtschreibprüfung bleibt zusätzlich aktiv.
+6. **Layout:** In „Gestaltung“ Textabstände (75–130 %), Fotogröße (50–100 %) und Seitenumbrüche vor Hauptabschnitten des Lebenslaufs einstellen. Die ausgewählte Vorlage und Farbe gelten für Anschreiben, Lebenslauf und Deckblatt. Word übernimmt Inhalte, Foto, Abstände und Seitenumbrüche in seiner einspaltigen Fassung.
+
+**Komplette Mappe ansehen:** Unter „Anlagen“ oder „Prüfen & Export“ alle Seiten einschließlich bearbeiteter Anlagen einzeln durchblättern. Die Anzeige rendert jeweils eine Seite und hat dadurch nicht die Zwölf-Seiten-Grenze der normalen Editorvorschau.
+
+Alle neuen Funktionen arbeiten lokal. Die eigene Lebenslauffassung und Anlagenbearbeitungen werden von älteren Restlos-Versionen nicht angewendet; für diese Funktionen bitte Version 0.10 oder neuer verwenden.
 
 ## Neu in 0.9.1: Größe der Unterschrift
 

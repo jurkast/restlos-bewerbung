@@ -96,16 +96,18 @@ def persist(s,active_id=None,generate=True):
   for a in p['applications']:
    ap=application_dir(p,a);write(ap/'Bewerbung.json',json.dumps(a,ensure_ascii=False,indent=2))
    write(ap/'Anschreiben/Anschreiben.txt',a['salutation']+'\n\n'+a['letter']+'\n\nMit freundlichen Grüßen\n'+p['profile']['name'])
-   write(ap/'Lebenslauf/Lebenslauf.txt','\n\n'.join(p['profile'][k] for k in PROFILE_FIELDS)+'\n\n'+__import__('personal').details(p['profile']))
+   cv=__import__('studio').cv_profile(p['profile'],a)
+   write(ap/'Lebenslauf/Lebenslauf.txt','\n\n'.join(cv[k] for k in PROFILE_FIELDS)+'\n\n'+__import__('personal').details(cv))
    manifest=ap/'Anlagen/.zugeordnet.json'
    previous=json.loads(manifest.read_text()) if manifest.exists() else []
    write(ap/'Anlagen/Verzeichnis.txt','\n'.join(a['attachments']))
-   for rel in a['attachments']:
-    src=resolve(rel);dst=ap/'Anlagen'/src.name
-    if not src.exists(): raise ValueError('Anlage fehlt: '+src.name)
-    if not dst.exists() or src.stat().st_mtime>dst.stat().st_mtime: shutil.copyfile(src,dst);dst.chmod(0o600)
+   for index,rel in enumerate(a['attachments']):
+    src=resolve(rel);dst=ap/'Anlagen'/(str(index+1).zfill(2)+'-'+src.name)
+    if not src.is_file() or src.is_symlink():continue
+    from studio import attachment_pdf
+    temporary=dst.with_suffix('.tmp.pdf');attachment_pdf(a,rel,temporary);temporary.chmod(0o600);temporary.replace(dst)
    # Remove only managed copies no longer linked to this application.
-   linked={Path(n).name for n in a['attachments']}
+   linked={str(i+1).zfill(2)+'-'+Path(n).name for i,n in enumerate(a['attachments'])}
    for name in previous:
     old=ap/'Anlagen'/Path(name).name
     if old.is_file() and old.name not in linked: old.unlink()
@@ -119,7 +121,7 @@ def persist(s,active_id=None,generate=True):
   p=selected(s)
   for a in p['applications']:
    folder=application_dir(p,a)
-   digest=hashlib.sha256(json.dumps(['0.8.0',p['profile'],{k:v for k,v in a.items() if k not in ('tracking','aiDraft','letterHistory')}],sort_keys=True).encode()).hexdigest()
+   digest=hashlib.sha256(json.dumps(['0.10.0',p['profile'],{k:v for k,v in a.items() if k not in ('tracking','aiDraft','letterHistory')}],sort_keys=True).encode()).hexdigest()
    stamp=folder/'.pdf-state'
    if stamp.exists() and stamp.read_text()==digest: continue
    for kind,name in [('letter','Anschreiben/Anschreiben.pdf'),('cv','Lebenslauf/Lebenslauf.pdf')]+([('cover','Deckblatt/Deckblatt.pdf')] if a.get('design',{}).get('cover') else []):

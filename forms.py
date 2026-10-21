@@ -69,6 +69,8 @@ def validate_forms(p,a=None):
   if isinstance(value,bool) or not isinstance(value,(int,float)) or not lo<=value<=hi:raise ValueError('Ungültiger Fotoausschnitt.')
  if settings.get('shape') not in ('portrait','square','round'):raise ValueError('Ungültige Fotoform.')
  if a is not None:
+  from studio import validate_studio
+  validate_studio(p,a)
   tracking=a['tracking']
   if not isinstance(tracking,dict) or any(not isinstance(tracking.get(k),str) for k in ('deadline','followup','sent','notes')):raise ValueError('Ungültige Bewerbungsplanung.')
   from datetime import date
