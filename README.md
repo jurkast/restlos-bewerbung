@@ -1,19 +1,32 @@
-# Restlos Bewerbung 0.10 – Bewerbungen individuell fertigstellen
+# Restlos Bewerbung 0.10.1 – Bewerbungen individuell fertigstellen
 
 Ein lokales Bewerbungsprogramm für Zorin OS 18.1 / Ubuntu 24.04 (x86_64).
 
 ## Installieren oder aktualisieren
 
 1. Ein geöffnetes Restlos-Fenster schließen. Änderungen werden beim Schließen gespeichert.
-2. `restlos-bewerbung_0.10.0_amd64.deb` per Doppelklick öffnen.
+2. `restlos-bewerbung_0.10.1_amd64.deb` per Doppelklick öffnen.
 3. In der Softwareinstallation **Installieren** beziehungsweise **Aktualisieren** wählen und bei Bedarf dein Linux-Passwort eingeben.
 4. Anschließend im Anwendungsmenü nach **Restlos Bewerbung** suchen.
 
 Das Paket aktualisiert eine bereits installierte Restlos-Version. Deine Daten unter `~/Documents/Restlos Bewerbung/` bleiben erhalten. Vor dem Update ist eine ZIP-Sicherung über **Sicherung & Daten** möglich. Fehlende Systemabhängigkeiten werden bei der Installation aus den Paketquellen ergänzt.
 
-Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.10.0_amd64.deb` verwendet werden.
+Wenn die Datei im Archivprogramm statt in der Softwareinstallation geöffnet wird: Rechtsklick → **Mit anderer Anwendung öffnen → Softwareinstallation**. Alternativ kann im Terminal `sudo apt install /vollständiger/Pfad/restlos-bewerbung_0.10.1_amd64.deb` verwendet werden.
 
 Ohne Installation lässt sich im vollständigen Programmordner **Restlos Bewerbung starten.sh** ausführen. Dafür werden Python 3.12, Poppler, DejaVu-Schriften, Hunspell mit deutschem Wörterbuch, Tesseract mit Deutsch/Englisch und übliche Linux-Grafikbibliotheken benötigt. Die Python- und Qt-Bibliotheken sind mitgeliefert.
+
+## Neu in 0.10.1: Fehlerbehebungen
+
+- **Flüssigeres Tippen:** Beim automatischen Speichern werden nur noch geänderte Dateien geschrieben. Anlagenkopien entstehen nur neu, wenn sich Anlagen, Seitenbearbeitung oder Originaldatei ändern. Anschreiben-, Lebenslauf- und Deckblatt-PDFs im Bewerbungsordner werden im Hintergrund erzeugt; beim Schließen wird alles vollständig gespeichert.
+- **Word-Export:** Kein Abbruch mehr, wenn in Berufserfahrung oder Ausbildung mehrere Leerzeilen hintereinander stehen (auch im PDF entstehen dadurch keine leeren Überschriften mehr).
+- **Datenrettung:** Ist `data.json` beschädigt, lädt Restlos automatisch `data.previous.json` oder die neueste Tageskopie unter `Sicherungen/Täglich/` und behält die beschädigte Datei als `data.defekt-….json`. `data.previous.json` enthält jetzt einen mindestens 15 Minuten älteren Stand; zusätzlich gibt es eine Tageskopie der Formulardaten (14 Tage).
+- **Wiederherstellen** funktioniert auch, wenn die aktuellen Daten beschädigt sind. Die Sicherung vor der Wiederherstellung liegt jetzt unter `Sicherungen/`.
+- **Sicheres Schließen:** Antwortet die Oberfläche nicht, fragt Restlos nach 8 Sekunden, ob das Fenster trotzdem geschlossen werden soll.
+- **Textprüfung:** Keine falschen Vorschläge mehr bei „Ich hoffe das Beste“ oder „…, die die Abteilung“.
+- **Bewerbungscheck:** Verständliche Abschnittsnamen statt interner Feldnamen. Der Firmenabgleich ignoriert Rechtsformen wie GmbH oder AG („Müller GmbH“ passt zu „Müller Logistik GmbH“).
+- **Betreff ohne Position:** „Bewerbung“ statt „Bewerbung als “. Der E-Mail-Anhang heißt `Bewerbung_Vorname_Nachname.pdf`.
+- **Speicherplatz:** Von den Sicherungen vor Updates bleiben die fünf neuesten erhalten. Vorbereitete Programmversionen werden auf die laufende, aktive und vorherige Version begrenzt (je etwa 1 GB). Wird dieselbe Datei (z. B. Foto oder Unterschrift) erneut ausgewählt, verwendet Restlos die vorhandene Kopie statt eines Duplikats.
+- Automatische Tests unter `tests/` (`python3 -m pytest tests`).
 
 ## Neu in 0.10: Sechs Bereiche für die fertige Bewerbung
 
@@ -63,7 +76,7 @@ Für den Wechsel von 0.5 oder älter muss dieses DEB-Paket **einmalig** installi
 Restlos lädt ausschließlich Programmupdates aus den öffentlichen Releases von https://github.com/jurkast/restlos-bewerbung. Beim Start und alle sechs Stunden prüft es auf eine neuere Version. Signatur, Prüfsumme, Dateigröße, Programmkennung und Plattform müssen passen. Ein vollständiges Update wird im Benutzerverzeichnis vorbereitet und beim nächsten normalen Start aktiviert. Die laufende Arbeit wird nicht durch einen Neustart unterbrochen.
 
 - Bewerbungsdaten bleiben unter `~/Documents/Restlos Bewerbung/`.
-- Vor der Aktivierung entsteht dort unter **Sicherungen** eine vollständige lokale ZIP-Sicherung. Scheitert die Sicherung, wird das Update nicht aktiviert. Die Sicherungen werden nicht automatisch gelöscht.
+- Vor der Aktivierung entsteht dort unter **Sicherungen** eine vollständige lokale ZIP-Sicherung. Scheitert die Sicherung, wird das Update nicht aktiviert. Die fünf neuesten Sicherungen vor Updates bleiben erhalten; ältere werden automatisch entfernt.
 - Programmupdates liegen getrennt unter `~/.local/share/restlos-bewerbung-updates/` und benötigen zusätzlich etwa 1 GB pro vorbereiteter Version. Für die Vorbereitung werden mindestens 3 GB freier Speicher verlangt.
 - Für normale Programmupdates ist kein Administratorpasswort erforderlich. Neue Systemabhängigkeiten können später dennoch ein neues DEB-Paket erfordern; die App zeigt dies dann an.
 - Eine neue Version, die beim ersten Start die Oberfläche nicht erreicht, wird beim nächsten Start zurückgenommen. Unter **Updates & Startcheck** kannst du auch selbst zur vorherigen Programmversion wechseln. Dabei werden automatische Updates vorerst ausgeschaltet. Deine Daten werden dadurch nicht auf einen alten Stand zurückgesetzt.

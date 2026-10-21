@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build signed runtime ZIP and DEB from an explicit source/runtime whitelist."""
-import argparse,hashlib,json,os,re,shutil,subprocess,tempfile,zipfile
+import argparse,hashlib,json,re,shutil,subprocess,tempfile,zipfile
 from pathlib import Path
 parser=argparse.ArgumentParser();parser.add_argument('--runtime',type=Path,required=True,help='Directory with lib/ and native/');parser.add_argument('--key',type=Path,required=True,help='Private Ed25519 key, outside source tree');parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
 root=Path(__file__).resolve().parents[1];v=(root/'VERSION').read_text().strip()

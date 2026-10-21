@@ -128,6 +128,26 @@ def rollback():
 def startup_ready():
  pending=read(HOME/'launch-pending.json',{})
  if pending.get('version')==current_version():(HOME/'launch-pending.json').unlink(missing_ok=True)
+ try:prune_versions()
+ except OSError:pass
+
+def prune_versions():
+ """Each prepared version needs about 1 GB. Keep only the running, the active
+ and the previous version (for rollback); remove older ones."""
+ folder=HOME/'versions'
+ if not folder.is_dir():return []
+ active=read(HOME/'current.json',{})
+ keep={current_version(),active.get('version',''),active.get('previous','')}
+ if ROOT.parent.resolve()==folder.resolve():keep.add(ROOT.name)
+ pending=read(HOME/'launch-pending.json',{}).get('version')
+ if pending:keep.add(pending)
+ removed=[]
+ for entry in folder.iterdir():
+  if entry.name in keep or entry.is_symlink() or not entry.is_dir():continue
+  try:version(entry.name)
+  except ValueError:continue
+  shutil.rmtree(entry);removed.append(entry.name)
+ return removed
 
 def choose_launch():
  active=read(HOME/'current.json',{});v=active.get('version')

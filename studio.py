@@ -2,6 +2,12 @@
 import copy,re,base64,subprocess,tempfile
 from pathlib import Path
 CV_KEYS=('title','summary','experience','education','skills','languages','projects','hobbies')
+ARTICLES={'der','die','das','den','dem','des'}
+CLAUSE_STARTS={'ich','sie','er','es','wir','ihr','man','mich','mir','ihnen','ihre','ihr','mein','meine','meinen','meiner','meinem','unser','unsere','unseren','diese','dieser','dieses','dies','sich','auch','gerade'}
+FIELD_LABELS={'letter':'Anschreiben','recipient':'Empfängeranschrift','title':'Berufsbezeichnung','summary':'Kurzprofil','experience':'Berufserfahrung','education':'Ausbildung','skills':'Kenntnisse','languages':'Sprachen','projects':'Projekte & Engagement','hobbies':'Interessen'}
+LEGAL_FORMS=r'\b(gmbh|mbh|ag|kg|ohg|gbr|ug|haftungsbeschränkt|e\.?\s?v|e\.?\s?k|se|co|ltd|inc|llc|kgaa|stiftung|und|&)\b'
+def company_words(name):
+ cleaned=re.sub(LEGAL_FORMS,' ',name.lower());return [w for w in re.findall(r'[\wäöüß]+',cleaned) if len(w)>=3]
 def cv_profile(p,a):
  result=copy.deepcopy(p)
  if a.get('cv') is not None:
@@ -68,10 +74,21 @@ def repair_document(profile,document_id,source):
 def text_advice(text):
  issues=[]
  def issue(start,end,message,replacement=None):issues.append(dict(start=start,end=end,original=text[start:end],message=message,replacement=replacement))
- for m in re.finditer(r'\b([\wÄÖÜäöüß]+)(\s+)\1\b',text,re.I):issue(*m.span(),'Wort direkt wiederholt – bitte prüfen.',m.group(1))
+ for m in re.finditer(r'\b([\wÄÖÜäöüß]+)(\s+)\1\b',text,re.I):
+  word=m.group(1).lower()
+  if word in ARTICLES:
+   # „…, die die Abteilung …“ is correct German; only flag without a preceding comma.
+   if re.search(r',\s*$',text[:m.start()]):continue
+   issue(*m.span(),'„'+m.group(1)+' '+m.group(1)+'“ – bitte prüfen. Korrekt ist das z. B. nach einem Komma („…, die die …“).')
+  else:issue(*m.span(),'Wort direkt wiederholt – bitte prüfen.',m.group(1))
  for m in re.finditer(r'(?<=\S) {2,}(?=\S)',text):issue(*m.span(),'Mehrere Leerzeichen.', ' ')
  for phrase in ('Ich bin mir sicher das','Ich hoffe das','Ich bin davon überzeugt das'):
-  for m in re.finditer(r'\b'+re.escape(phrase)+r'\b',text,re.I):issue(*m.span(),'Hier wird der Nebensatz mit „dass“ eingeleitet.',re.sub(r' das$',', dass',m.group(),flags=re.I))
+  for m in re.finditer(r'\b'+re.escape(phrase)+r'\b(?=\s+(\S+))?',text,re.I):
+   following=(m.group(1) or '').strip('.,;:!?')
+   fixed=re.sub(r' das$',', dass',m.group(),flags=re.I)
+   if following.lower() in CLAUSE_STARTS:issue(*m.span(),'Hier wird der Nebensatz mit „dass“ eingeleitet.',fixed)
+   elif following[:1].isupper():continue  # „Ich hoffe das Beste“: Artikel vor einem Nomen
+   elif following:issue(*m.span(),'Bitte prüfen: Leitet „das“ hier einen Nebensatz ein, schreibe „, dass“.')
  for m in re.finditer(r'\bIch freue mich darauf Sie\b',text,re.I):issue(*m.span(),'Vor der folgenden Infinitivgruppe steht ein Komma.',re.sub(r' Sie$',', Sie',m.group(),flags=re.I))
  for m in re.finditer(r'[^.!?\n]+[.!?]?',text):
   if len(m.group().split())>30:issue(*m.span(),'Langer Satz: über 30 Wörter. Prüfe, ob du ihn aufteilen kannst.')
@@ -97,13 +114,14 @@ def application_check(s,a,check_size=True):
   if not a.get(key,'').strip():add(label+' fehlt.','stelle',key)
  texts=[('text','letter',a['letter']),('stelle','recipient',a['recipient'])]+[('cv',k,p.get(k,'')) for k in CV_KEYS]
  for step,key,text in texts:
-  if re.search(r'\[[^\]]+\]|\bTODO\b|\bXXX\b',text):add('Möglicher Platzhalter in '+key+'.',step,key)
+  if re.search(r'\[[^\]]+\]|\bTODO\b|\bXXX\b',text):add('Möglicher Platzhalter in „'+FIELD_LABELS.get(key,key)+'“.',step,key)
   for m in re.finditer(r'(\d{2})/(\d{4})\s*[–-]\s*(\d{2})/(\d{4})',text):
-   if not 1<=int(m[1])<=12 or not 1<=int(m[3])<=12 or m[2]+m[1]>m[4]+m[3]:add('Ungültiger oder rückwärts laufender Zeitraum.',step,key)
+   if not 1<=int(m[1])<=12 or not 1<=int(m[3])<=12 or m[2]+m[1]>m[4]+m[3]:add('Ungültiger oder rückwärts laufender Zeitraum in „'+FIELD_LABELS.get(key,key)+'“: '+m.group()+'.',step,key)
  for other in s['applications']:
   company=other.get('company','').strip()
   if len(company)>3 and company.lower()!=a['company'].strip().lower() and company.lower() in a['letter'].lower():add('Im Anschreiben steht auch das Unternehmen „'+company+'“. Bitte prüfen.','text','letter')
- if a['company'] and a['recipient'] and a['company'].lower() not in a['recipient'].lower():add('Unternehmen und Empfängeranschrift stimmen möglicherweise nicht überein.','stelle','recipient')
+ words=company_words(a['company'])
+ if words and a['recipient'] and not any(w in a['recipient'].lower() for w in words):add('Unternehmen und Empfängeranschrift stimmen möglicherweise nicht überein.','stelle','recipient')
  if not a['letter'].strip():add('Anschreibentext fehlt.','text','letter')
  for d in missing_documents(selected(s)):add('Datei fehlt oder ist verknüpft: '+d['name'],'documents')
  for rel in a['attachments']:

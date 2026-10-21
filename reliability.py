@@ -3,6 +3,7 @@ import json,zipfile,uuid,shutil
 from datetime import datetime
 from pathlib import Path
 from storage import DATA,validate,private_dir
+KEEP_UPDATE_BACKUPS=5
 
 def snapshot_before_update():
  data=DATA/'data.json'
@@ -24,6 +25,10 @@ def snapshot_before_update():
   temp.chmod(0o600);temp.replace(dest)
  except Exception:
   temp.unlink(missing_ok=True);raise
+ # Keep the newest backups before updates; older ones only take up space.
+ for old in sorted(folder.glob('Vor-Update-*.zip'))[:-KEEP_UPDATE_BACKUPS]:
+  try:old.unlink()
+  except OSError:pass
  return str(dest)
 
 def readiness(s):

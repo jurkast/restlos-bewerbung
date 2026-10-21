@@ -1,5 +1,5 @@
 """Local OCR. Originals are never uploaded or modified."""
-import os,shutil,subprocess,tempfile
+import shutil,subprocess,tempfile
 from pathlib import Path
 from PIL import Image,ImageOps
 

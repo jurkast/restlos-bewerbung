@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import sys,os,json,tempfile,subprocess,base64,uuid,traceback
+import sys,json,tempfile,subprocess,base64,uuid,threading
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent
 sys.path.insert(0,str(ROOT/'lib'))
@@ -33,9 +33,21 @@ def launch():
   def closeEvent(self,event):
    if getattr(self,'closing',False):event.accept();return
    event.ignore()
+   if getattr(self,'closeWaiting',False):return
+   # The page saves and then asks Python to close. If the page does not answer
+   # (e.g. it failed to load), offer to close anyway instead of trapping the user.
+   self.closeAck=False;self.closeWaiting=True
    self.owner.web.page().runJavaScript("bridge('save_and_close');")
+   QTimer.singleShot(8000,self.close_timeout)
+  def close_timeout(self):
+   self.closeWaiting=False
+   if self.closeAck or getattr(self,'closing',False):return
+   answer=QMessageBox.question(self,'Restlos Bewerbung','Die Oberfläche antwortet nicht, deshalb konnte nicht gespeichert werden. Trotzdem schließen?\n\nZuletzt automatisch gespeicherte Änderungen bleiben erhalten.')
+   if answer==QMessageBox.Yes:
+    self.owner.drain_pdfs();self.closing=True;self.close()
  class App:
   def __init__(self):
+   self.pdfpool=ThreadPoolExecutor(max_workers=1);self.pdfLock=threading.Lock();self.pdfState=None;self.pdfBusy=False
    self.updatepool=ThreadPoolExecutor(max_workers=1);self.updateBusy=False;self.aipool=ThreadPoolExecutor(max_workers=1);self.aiBusy=False;self.pool=ThreadPoolExecutor(max_workers=1);self.spellpool=ThreadPoolExecutor(max_workers=1);self.result=Result();self.result.ready.connect(self.emit);self.speller=None
    self.win=Window();self.win.owner=self;self.win.setWindowTitle('Restlos Bewerbung');self.win.resize(1460,950)
    self.web=QWebEngineView();page=Page(self.web);page.owner=self;self.web.setPage(page)
@@ -50,6 +62,26 @@ def launch():
    from photos import cropped
    photo=s['profile'].get('photo')
    self.emit({'type':'load','data':s,'root':str(DATA),'folder':str(profile_dir(selected(s))),'photoPreview':base64.b64encode(cropped(s['profile']).getvalue()).decode() if photo and resolve(photo).is_file() else ''})
+  def save(self,s,active_id=None):
+   # Fast save of the form data; document PDFs follow in the background.
+   persist(s,active_id,generate=False);self.schedule_pdfs(s)
+  def schedule_pdfs(self,s):
+   with self.pdfLock:
+    self.pdfState=s
+    if self.pdfBusy:return
+    self.pdfBusy=True
+   def work():
+    while True:
+     with self.pdfLock:
+      current=self.pdfState;self.pdfState=None
+      if current is None:self.pdfBusy=False;return
+     try:generate_documents(current,background=True)
+     except Exception as e:print('Restlos: PDF-Ablage wird beim nächsten Speichern erneut versucht:',e,file=sys.stderr)
+   self.pdfpool.submit(work)
+  def drain_pdfs(self):
+   # Drop queued work and wait for a running generation before a synchronous save.
+   with self.pdfLock:self.pdfState=None
+   self.pdfpool.submit(lambda:None).result()
   def notice(self,text):self.emit({'type':'notice','text':text})
   def task(self,fn,pool=None):
    def run():
@@ -69,8 +101,12 @@ def launch():
   def message(self,message):
    try:
     req=json.loads(message);action=req['action']
+    if action=='save_and_close':self.win.closeAck=True
     if action=='load':
-     s=load();persist(s,generate=False);self.state(s);return
+     s=load();persist(s,generate=False);self.state(s)
+     import storage
+     if storage.RECOVERED:self.notice(storage.RECOVERED)
+     return
     s=absorb(req['data']);p=selected(s);a=next((x for x in s['applications'] if x['id']==req['id']),s['applications'][0])
     if action=='startup_ready':
      from updates import startup_ready,config
@@ -91,7 +127,7 @@ def launch():
      from updates import rollback,status
      rollback();self.emit({'type':'update_status',**status()});return
     if action=='save_and_close':
-     persist(s,a['id']);self.win.closing=True;self.win.close();return
+     self.drain_pdfs();persist(s,a['id']);self.win.closing=True;self.win.close();return
     if action=='ai_models':
      def status():
       try:
@@ -111,13 +147,13 @@ def launch():
      self.task(generate_text,self.aipool);return
     if action=='export_prompt':
      from assistant_local import prompt
-     text=prompt(s,a);persist(s,a['id']);dest=application_dir(p,a)/'Exporte'/('Texthilfe-Prompt_'+uuid.uuid4().hex[:8]+'.txt');write(dest,text);self.notice('Prompt lokal gespeichert: '+str(dest));return
+     text=prompt(s,a);self.save(s,a['id']);dest=application_dir(p,a)/'Exporte'/('Texthilfe-Prompt_'+uuid.uuid4().hex[:8]+'.txt');write(dest,text);self.notice('Prompt lokal gespeichert: '+str(dest));return
     if action=='signature_preview':
      from personal import signature_image
      self.emit({'type':'signature_preview','profileId':s['selectedProfile'],'image':base64.b64encode(signature_image(s['profile'])[0].getvalue()).decode() if s['profile'].get('signature') and resolve(s['profile']['signature']).is_file() else ''});return
     if action=='signature_create':
      from personal import save_created_signature
-     save_created_signature(s,req.get('image'));persist(s,a['id']);self.state(s);return
+     save_created_signature(s,req.get('image'));self.save(s,a['id']);self.state(s);return
     if action=='signature':
      source,_=QFileDialog.getOpenFileName(self.win,'Unterschrift auswählen',str(Path.home()),'Bilder (*.png *.jpg *.jpeg *.webp)')
      if not source:return
@@ -126,7 +162,7 @@ def launch():
      with Image.open(source) as im:
       if im.width*im.height>30000000:raise ValueError('Bitte ein Bild mit höchstens 30 Megapixeln verwenden.')
       im.load()
-     d=document_copy(s,source,'Sonstiges');s['profile']['signature']=d['path'];persist(s,a['id']);self.state(s);return
+     d=document_copy(s,source,'Sonstiges');s['profile']['signature']=d['path'];self.save(s,a['id']);self.state(s);return
     if action=='photo':
      source,_=QFileDialog.getOpenFileName(self.win,'Bewerbungsfoto auswählen',str(Path.home()),'Bilder (*.jpg *.jpeg *.png *.webp)')
      if not source:return
@@ -135,7 +171,7 @@ def launch():
      with Image.open(source) as im:
       if im.width*im.height>30000000:raise ValueError('Bitte ein Bild mit höchstens 30 Megapixeln verwenden.')
       im.load()
-     d=document_copy(s,source,'Fotos');s['profile']['photo']=d['path'];s['profile']['photoSettings']={'zoom':1,'x':0.5,'y':0.5,'shape':'portrait'};persist(s,a['id']);self.state(s);return
+     d=document_copy(s,source,'Fotos');s['profile']['photo']=d['path'];s['profile']['photoSettings']={'zoom':1,'x':0.5,'y':0.5,'shape':'portrait'};self.save(s,a['id']);self.state(s);return
     if action=='photo_preview':
      from photos import cropped
      self.emit({'type':'photo_preview','profileId':s['selectedProfile'],'image':base64.b64encode(cropped(s['profile']).getvalue()).decode() if s['profile']['photo'] else ''});return
@@ -167,7 +203,7 @@ def launch():
        path=Path(td)/'packet.pdf';make_pdf(s,a,path)
        return {'type':'studio_packet','profileId':p['id'],'applicationId':a['id'],'token':req.get('token'),**render_pages(path,int(req.get('start',0)),1)}
      self.task(packet);return
-    if action=='save':persist(s,a['id']);self.emit({'type':'saved'});return
+    if action=='save':self.save(s,a['id']);self.emit({'type':'saved'});return
     if action=='spell':
      def check():
       if self.speller is None:self.speller=Speller()
@@ -187,14 +223,14 @@ def launch():
        return {'type':'preview','token':req.get('token'),'count':count,'pages':[base64.b64encode(f.read_bytes()).decode() for f in pages]}
      self.task(preview);return
     if action=='new_profile':
-     persist(s,generate=False);label=req.get('label','Neues Profil').strip() or 'Neues Profil';np=new_profile(label);s['profiles'].append(np);activate(s,np['id']);persist(s);self.state(s);return
+     persist(s,generate=False);label=req.get('label','Neues Profil').strip() or 'Neues Profil';np=new_profile(label);s['profiles'].append(np);activate(s,np['id']);self.save(s);self.state(s);return
     if action=='open_folder':
-     persist(s,a['id']);dest=application_dir(p,a) if req.get('application') else profile_dir(p);QDesktopServices.openUrl(QUrl.fromLocalFile(str(dest)));return
+     self.save(s,a['id']);dest=application_dir(p,a) if req.get('application') else profile_dir(p);QDesktopServices.openUrl(QUrl.fromLocalFile(str(dest)));return
     if action=='duplicate_application':
      import copy
-     persist(s,a['id']);clone=copy.deepcopy(a);clone['id']=ident();clone.pop('folder',None);clone.pop('aiDraft',None);clone.pop('letterHistory',None);clone['tracking']={'deadline':'','followup':'','sent':'','notes':''};clone['status']='Entwurf';clone['company']=(clone['company']+' – Kopie').strip();s['applications'].append(clone);persist(s,clone['id']);self.state(s);self.notice('Kopie angelegt. Firma und Empfänger vor dem Versand anpassen.');return
+     self.save(s,a['id']);clone=copy.deepcopy(a);clone['id']=ident();clone.pop('folder',None);clone.pop('aiDraft',None);clone.pop('letterHistory',None);clone['tracking']={'deadline':'','followup':'','sent':'','notes':''};clone['status']='Entwurf';clone['company']=(clone['company']+' – Kopie').strip();s['applications'].append(clone);self.save(s,clone['id']);self.state(s);self.notice('Kopie angelegt. Firma und Empfänger vor dem Versand anpassen.');return
     if action in ('export_word','export_mail'):
-     persist(s,a['id']);folder=application_dir(p,a)/'Exporte';stamp=__import__('datetime').datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+'_'+uuid.uuid4().hex[:4]
+     self.save(s,a['id']);folder=application_dir(p,a)/'Exporte';stamp=__import__('datetime').datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+'_'+uuid.uuid4().hex[:4]
      if action=='export_word':
       from word_export import make_docx
       kind=req.get('kind','cv');dest=folder/({'cv':'Lebenslauf','letter':'Anschreiben','cover':'Deckblatt'}[kind]+'_'+stamp+'.docx');make_docx(s,a,dest,kind)
@@ -203,7 +239,7 @@ def launch():
       pdf=folder/('Bewerbung_'+stamp+'.pdf');make_pdf(s,a,pdf);pdf.chmod(0o600);dest=folder/('E-Mail-Entwurf_'+stamp+'.eml');mail_draft(dest,pdf,s,a)
      dest.chmod(0o600);self.notice('Gespeichert: '+str(dest)+('\nEs wurde keine E-Mail versendet.' if action=='export_mail' else '\nWord-Ausgabe als bearbeitbare einspaltige Fassung.'));return
     if action=='export':
-     persist(s,a['id']);kind=req.get('kind','all');prefix={'all':'Bewerbungsmappe','cv':'Lebenslauf','letter':'Anschreiben','cover':'Deckblatt'}[kind]
+     self.save(s,a['id']);kind=req.get('kind','all');prefix={'all':'Bewerbungsmappe','cv':'Lebenslauf','letter':'Anschreiben','cover':'Deckblatt'}[kind]
      timestamp=__import__('datetime').datetime.now().strftime('%Y-%m-%d_%H-%M-%S');dest=application_dir(p,a)/'Exporte'/(prefix+'_'+timestamp+'_'+uuid.uuid4().hex[:4]+'.pdf')
      make_pdf(s,a,dest,kind);dest.chmod(0o600);self.emit(__import__('delivery').pdf_report(dest,s,a));return
     if action in ('attach','import'):
@@ -219,8 +255,8 @@ def launch():
        if r.is_encrypted:raise ValueError('Bitte PDFs ohne Passwort wählen.')
      for f in files:
       d=document_copy(s,f,category);imported.append(d)
-      if action=='attach':a['attachments'].append(d['path'])
-     persist(s,a['id']);self.state(s)
+      if action=='attach' and d['path'] not in a['attachments']:a['attachments'].append(d['path'])
+     self.save(s,a['id']);self.state(s)
      if req.get('extract') and imported:
       d=imported[0]
       def imported_text():return {'type':'import','document':d,'profileId':p['id'],'applicationId':a['id'],**suggest(extract(resolve(d['path']),lambda text:self.result.ready.emit({'type':'progress','text':text})),category)}
@@ -233,15 +269,15 @@ def launch():
     if action=='open_document':
      d=next(d for d in p['documents'] if d['id']==req['document']);QDesktopServices.openUrl(QUrl.fromLocalFile(str(resolve(d['path']))));return
     if action=='backup':
-     dest,_=QFileDialog.getSaveFileName(self.win,'Vollständige Sicherung',str(Path.home()/'Restlos-Bewerbung-Sicherung.zip'),'ZIP-Dateien (*.zip)')
+     self.drain_pdfs();dest,_=QFileDialog.getSaveFileName(self.win,'Vollständige Sicherung',str(Path.home()/'Restlos-Bewerbung-Sicherung.zip'),'ZIP-Dateien (*.zip)')
      if dest:backup(s,Path(dest));self.notice('Alle Profile, Dokumente und Bewerbungen wurden gesichert.')
      return
     if action=='restore':
      src,_=QFileDialog.getOpenFileName(self.win,'Sicherung wiederherstellen',str(Path.home()),'ZIP-Dateien (*.zip)')
-     if src and QMessageBox.question(self.win,'Sicherung wiederherstellen','Alle Profile durch die Sicherung ersetzen? Der aktuelle Bestand wird vorher vollständig gesichert.')==QMessageBox.Yes:self.state(restore(src))
+     if src and QMessageBox.question(self.win,'Sicherung wiederherstellen','Alle Profile durch die Sicherung ersetzen? Der aktuelle Bestand wird vorher vollständig gesichert.')==QMessageBox.Yes:self.drain_pdfs();self.state(restore(src))
      return
    except Exception as e:
     if isinstance(locals().get('req'),dict) and req.get('action')=='ai_generate':self.emit({'type':'ai_error','text':str(e),'requestId':req.get('requestId')})
     else:self.emit({'type':'error','text':str(e)})
- instance=App();qapp.exec();instance.updatepool.shutdown(wait=True);instance.aipool.shutdown(wait=True);instance.pool.shutdown(wait=True);instance.spellpool.shutdown(wait=True)
+ instance=App();qapp.exec();instance.pdfpool.shutdown(wait=True);instance.updatepool.shutdown(wait=True);instance.aipool.shutdown(wait=True);instance.pool.shutdown(wait=True);instance.spellpool.shutdown(wait=True)
 if __name__=='__main__':launch()

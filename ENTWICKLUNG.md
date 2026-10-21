@@ -17,7 +17,7 @@ mkdir -p native
 
 ## Eine Änderung als Update veröffentlichen
 
-1. Änderung implementieren und testen. `VERSION` erhöhen, beispielsweise von `0.6.0` auf `0.6.1`.
+1. Änderung implementieren und testen (`python3 -m pytest tests`; die Tests verwenden eigene temporäre Datenordner). `VERSION` erhöhen, beispielsweise von `0.6.0` auf `0.6.1`.
 2. UI-Versionsanzeige, Dokumentation und Versionsstandardwerte ebenfalls aktualisieren. Neue Systemabhängigkeiten erfordern gegebenenfalls einen höheren `minimum_base`-Wert im Release-Skript und ein neues DEB-Paket.
 3. Mit dem bestehenden privaten Signierschlüssel außerhalb des Repositorys bauen:
 
