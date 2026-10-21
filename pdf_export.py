@@ -66,7 +66,9 @@ def sections(story,p,a,st,keys):
   story.append(para(LABELS[key],st['section']))
   if key in ('experience','education'):
    for block in p[key].split('\n\n'):
-    lines=block.split('\n');story.append(para(lines[0],st['station'] if len(lines)>1 else st['body']))
+    lines=block.strip('\n').split('\n')
+    if not lines[0].strip():continue
+    story.append(para(lines[0],st['station'] if len(lines)>1 else st['body']))
     if len(lines)>1:blocks(story,'\n'.join(lines[1:]),st['body'])
   else:blocks(story,p[key],st['body'])
 
@@ -76,7 +78,7 @@ def page_footer(c,doc,p,color):
 def letter_pdf(p,a,path):
  st=styles(a);conf=settings(a);story=[para(p['name'] or 'Dein Name',st['name']),para(' · '.join(filter(None,[p['email'],p['phone']]))+'\n'+p['address'],st['small'])]
  blocks(story,a['recipient'] or a['company'],st['body']);story.append(Spacer(1,8));story.append(para(', '.join(filter(None,[a['location'],a['date']])),st['small']))
- story.append(para('Bewerbung als '+(a['position'] or 'Position'),st['role']));blocks(story,a['salutation'],st['body']);blocks(story,a['letter'],st['body']);ending=[para('Mit freundlichen Grüßen',st['body']),Spacer(1,8)]
+ story.append(para('Bewerbung als '+a['position'].strip() if a['position'].strip() else 'Bewerbung',st['role']));blocks(story,a['salutation'],st['body']);blocks(story,a['letter'],st['body']);ending=[para('Mit freundlichen Grüßen',st['body']),Spacer(1,8)]
  if p.get('signature') and a['design'].get('signature',True) and resolve(p['signature']).is_file():
   stream,w,h=signature_image(p,a);im=Image(stream,width=w,height=h);im.hAlign='LEFT';ending.extend([im,Spacer(1,5)])
  ending.append(para(p['name'],st['body']));story.append(KeepTogether(ending))

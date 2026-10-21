@@ -1,4 +1,3 @@
-from pathlib import Path
 from io import BytesIO
 from PIL import Image,ImageOps,ImageDraw
 from storage import resolve

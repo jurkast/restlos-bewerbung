@@ -1,14 +1,12 @@
 """Editable Word exports using a robust single-column layout."""
 from docx import Document
 from docx.shared import Cm,Pt,RGBColor
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
 from forms import materialize
 from photos import cropped
 from personal import details,signature_image
 from studio import cv_profile
 from storage import resolve
-from pdf_export import settings,LABELS
+from pdf_export import LABELS
 
 def make_docx(s,a,path,kind='cv'):
  if kind not in ('cv','letter','cover'):raise ValueError('Für Word bitte Lebenslauf, Anschreiben oder Deckblatt wählen.')
@@ -24,7 +22,7 @@ def make_docx(s,a,path,kind='cv'):
   add(p['name'] or 'Dein Name','Title')
   add(' · '.join(filter(None,[p['email'],p['phone']]))+'\n'+p['address'])
  if kind=='letter':
-  head();add(a['recipient'] or a['company']);add(', '.join(filter(None,[a['location'],a['date']])));add('Bewerbung als '+a['position'],'Heading 1');add(a['salutation'])
+  head();add(a['recipient'] or a['company']);add(', '.join(filter(None,[a['location'],a['date']])));add('Bewerbung als '+a['position'].strip() if a['position'].strip() else 'Bewerbung','Heading 1');add(a['salutation'])
   for block in a['letter'].split('\n\n'):add(block)
   closing=add('Mit freundlichen Grüßen');closing.paragraph_format.keep_with_next=True
   if p.get('signature') and a['design'].get('signature',True) and resolve(p['signature']).is_file():
@@ -41,7 +39,10 @@ def make_docx(s,a,path,kind='cv'):
    add(LABELS[key],'Heading 1')
    for block in value.split('\n\n'):
     if key in ('experience','education'):
-     lines=block.split('\n');par=add(lines[0]);par.runs[0].bold=True;par.paragraph_format.keep_with_next=len(lines)>1
+     # Extra blank lines in free text must not produce empty headings.
+     lines=[x for x in block.strip('\n').split('\n')]
+     if not lines or not lines[0].strip():continue
+     par=add(lines[0]);par.runs[0].bold=True;par.paragraph_format.keep_with_next=len(lines)>1
      if len(lines)>1:add('\n'.join(lines[1:]))
     else:add(block)
  doc.save(path)
